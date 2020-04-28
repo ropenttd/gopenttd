@@ -71,6 +71,7 @@ func ScanServer(host string, port int) (serverstate OpenttdServerState, err erro
 	}
 	serverstate = OpenttdServerState{Host: serverAddr.String()}
 	serverstate.Populate(inBuf)
+	log.Fatalf("%x", inBuf)
 	return
 }
 
@@ -92,11 +93,15 @@ func (server *OpenttdServerState) Populate(p []byte) {
 		}
 	}
 
-	var timeCurrent uint32
-	var timeStart uint32
+	var timeCurrent time.Time
+	var timeStart time.Time
 	if protocolVer >= 3 {
-		_ = binary.Read(bytes.NewReader(infoData.Next(4)), binary.BigEndian, &timeCurrent)
-		_ = binary.Read(bytes.NewReader(infoData.Next(4)), binary.BigEndian, &timeStart)
+		var tc uint32
+		var ts uint32
+		_ = binary.Read(bytes.NewReader(infoData.Next(4)), binary.LittleEndian, &tc)
+		_ = binary.Read(bytes.NewReader(infoData.Next(4)), binary.LittleEndian, &ts)
+		timeCurrent = OttdDateFormat(tc)
+		timeStart = OttdDateFormat(ts)
 	}
 
 	var maxCompanies *int
@@ -127,10 +132,10 @@ func (server *OpenttdServerState) Populate(p []byte) {
 	mapNameBytes, _ := infoData.ReadBytes(byte(0))
 	mapName := string(bytes.Trim(mapNameBytes, "\x00"))
 
-	var mapWidth uint16
+	var mapWidth int
 	_ = binary.Read(bytes.NewReader(infoData.Next(2)), binary.BigEndian, &mapWidth)
 
-	var mapHeight uint16
+	var mapHeight int
 	_ = binary.Read(bytes.NewReader(infoData.Next(2)), binary.BigEndian, &mapHeight)
 
 	mapSet := int(infoData.Next(1)[0])
@@ -144,6 +149,10 @@ func (server *OpenttdServerState) Populate(p []byte) {
 	server.NeedPass = needPass
 	server.Environment = mapSet
 	server.Map = mapName
+	server.MapWidth = mapWidth
+	server.MapHeight = mapHeight
+	server.DateStart = timeStart
+	server.DateCurrent = timeCurrent
 	server.NumClients = currentClients
 	server.MaxClients = maxClients
 	server.NumSpectators = currentSpectators
