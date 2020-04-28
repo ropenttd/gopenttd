@@ -71,7 +71,6 @@ func ScanServer(host string, port int) (serverstate OpenttdServerState, err erro
 	}
 	serverstate = OpenttdServerState{Host: serverAddr.String()}
 	serverstate.Populate(inBuf)
-	log.Fatalf("%x", inBuf)
 	return
 }
 
