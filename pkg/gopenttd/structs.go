@@ -40,8 +40,8 @@ type OpenttdServerState struct {
 	Map string `json:"map_name"`
 
 	// MapHeight and MapWidth are the height and width of the current map in tiles.
-	MapHeight int `json:"map_height"`
-	MapWidth  int `json:"map_width"`
+	MapHeight uint16 `json:"map_height"`
+	MapWidth  uint16 `json:"map_width"`
 
 	// DateStart and DateCurrent are time objects relating to the start of the game and the current date.
 	DateStart   time.Time `json:"date_start"`

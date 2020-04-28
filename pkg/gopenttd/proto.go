@@ -132,11 +132,11 @@ func (server *OpenttdServerState) Populate(p []byte) {
 	mapNameBytes, _ := infoData.ReadBytes(byte(0))
 	mapName := string(bytes.Trim(mapNameBytes, "\x00"))
 
-	var mapWidth int
-	_ = binary.Read(bytes.NewReader(infoData.Next(2)), binary.BigEndian, &mapWidth)
+	var mapWidth uint16
+	_ = binary.Read(bytes.NewReader(infoData.Next(2)), binary.LittleEndian, &mapWidth)
 
-	var mapHeight int
-	_ = binary.Read(bytes.NewReader(infoData.Next(2)), binary.BigEndian, &mapHeight)
+	var mapHeight uint16
+	_ = binary.Read(bytes.NewReader(infoData.Next(2)), binary.LittleEndian, &mapHeight)
 
 	mapSet := int(infoData.Next(1)[0])
 	dedicatedServer := int(infoData.Next(1)[0])
