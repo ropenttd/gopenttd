@@ -1,12 +1,63 @@
 package gopenttd
 
-import "time"
+import (
+	"net"
+	"time"
+)
+
+type GameConn interface {
+	Open() error
+	Close() error
+	Query() error
+}
+
+type OpenttdClientConnection struct {
+	Hostname   string
+	Port       int
+	Connection *net.UDPConn
+}
 
 type OpenttdNewgrf struct {
 	// Identifier is the NewGRF's ID. This should correspond to its ID on BaNaNaS.
 	Identifier string `json:"id"`
 	// Hash is the MD5 checksum that the server reports for this NewGRF.
 	Hash string `json:"md5"`
+}
+
+type OpenttdTypeCounts struct {
+	// Trains, stations.
+	Train uint16 `json:"train"`
+	// Trucks, freight depots.
+	Truck uint16 `json:"truck"`
+	// Buses, bus stations.
+	Bus uint16 `json:"bus"`
+	// Aircraft, airports.
+	Aircraft uint16 `json:"aircraft"`
+	// Ships, docks.
+	Ship uint16 `json:"ship"`
+}
+
+type OpenttdCompany struct {
+	// The ID of the company. Starts from 0.
+	Id uint8 `json:"id"`
+	// The company name.
+	Name string `json:"name"`
+	// The year the company was first founded.
+	YearStart uint32 `json:"start_year"`
+	// The value of the company, in credits.
+	Value uint64 `json:"value"`
+	// The amount of disposable cash the company has.
+	Money uint64 `json:"cash"`
+	// The company's current income.
+	Income uint64 `json:"income"`
+	// The company's performance index. Maximum score of 1000.
+	Performance uint16 `json:"performance"`
+	// Whether the company has a password set.
+	Passworded bool `json:"is_passworded"`
+
+	// A count of the vehicles and stations the company has.
+	Vehicles OpenttdTypeCounts `json:"vehicle_count"`
+	Stations OpenttdTypeCounts `json:"station_count"`
 }
 
 type OpenttdServerState struct {
@@ -59,4 +110,7 @@ type OpenttdServerState struct {
 	NewgrfCount int `json:"newgrf_count"`
 	// NewgrfActive is a set of OpenttdNewgrf structs corresponding to the currently active Newgrfs.
 	NewgrfActive []OpenttdNewgrf `json:"newgrf_active"`
+
+	// Companies is a list of active company data, where available.
+	Companies []OpenttdCompany `json:"companies"`
 }

@@ -42,7 +42,7 @@ var OpenttdLanguages = map[int]language.Tag{
 	33: language.Tag{}, // Galican
 	34: language.Greek,
 	35: language.Latvian,
-	36: language.Tag{}, // Count (afaict a marker of the last language, effectively invalid
+	36: language.Tag{}, // Count (afaict a marker of the last language, effectively invalid)
 }
 
 var OpenttdEnvironments = map[int]string{
