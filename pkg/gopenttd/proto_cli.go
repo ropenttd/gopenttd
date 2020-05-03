@@ -15,11 +15,11 @@ import (
 	"github.com/skybon/goutil"
 )
 
-func getByteString(byteArray []byte) string {
-	return fmt.Sprintf("%x", byteArray)
-}
-
 func (c *OpenttdClientConnection) Open() (err error) {
+	if c.Connection != nil {
+		// We're already connected
+		return nil
+	}
 	// Determine the correct UDP address
 	server := fmt.Sprintf("%s:%d", c.Hostname, c.Port) // "255.255.255.255", 10000
 	serverAddr, err := net.ResolveUDPAddr("udp", server)
@@ -37,6 +37,7 @@ func (c *OpenttdClientConnection) Open() (err error) {
 }
 
 func (c *OpenttdClientConnection) Close() (err error) {
+	log.Debugf("Connection to %s:%d closed", c.Hostname, c.Port)
 	return c.Connection.Close()
 }
 
@@ -101,6 +102,7 @@ func ScanServer(host string, port int) (serverstate OpenttdServerState, err erro
 	if err != nil {
 		return OpenttdServerState{Status: false, Error: err}, err
 	}
+	defer obj.Close()
 
 	// Let's get the initial set of data using CLIENT_FIND_SERVER
 	result, err := obj.Query(openttd_packets_udp.ClientFindServer, openttd_packets_udp.ServerResponse)
@@ -119,7 +121,7 @@ func ScanServer(host string, port int) (serverstate OpenttdServerState, err erro
 	return
 }
 
-// PopulateServerState populates an OpenttdServerState struct with data parsed from the Info request in the buffer.
+// populateServerState populates an OpenttdServerState struct with data parsed from the Info request in the buffer.
 func (server *OpenttdServerState) populateServerState(buf *bytes.Buffer) {
 	// Props to https://github.com/vorot93/grokstat/blob/master/protocol_openttds.go for most of this code
 
@@ -199,7 +201,7 @@ func (server *OpenttdServerState) populateServerState(buf *bytes.Buffer) {
 	server.NewgrfActive = activeNewGRFsInfo
 }
 
-// PopulateCompanyState populates an OpenttdServerState struct with company data.
+// populateCompanyState populates an OpenttdServerState struct with company data.
 func (server *OpenttdServerState) populateCompanyState(buf *bytes.Buffer) {
 	// Props to https://github.com/sonicsnes/node-gamedig/blob/master/protocols/openttd.js for most of this code
 

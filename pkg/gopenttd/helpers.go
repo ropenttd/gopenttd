@@ -1,6 +1,7 @@
 package gopenttd
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -13,4 +14,8 @@ func OttdDateFormat(date uint32) (t time.Time) {
 	t = t.AddDate(0, 0, int(date))
 
 	return t
+}
+
+func getByteString(byteArray []byte) string {
+	return fmt.Sprintf("%x", byteArray)
 }

@@ -17,6 +17,12 @@ type OpenttdClientConnection struct {
 	Connection *net.UDPConn
 }
 
+type OpenttdAdminConnection struct {
+	Hostname   string
+	Port       int
+	Connection *net.TCPConn
+}
+
 type OpenttdNewgrf struct {
 	// Identifier is the NewGRF's ID. This should correspond to its ID on BaNaNaS.
 	Identifier string `json:"id"`
