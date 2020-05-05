@@ -6,7 +6,7 @@ import (
 )
 
 var OpenttdLanguages = map[int]language.Tag{
-	0:  language.Tag{}, // Any
+	0:  {}, // Any
 	1:  language.English,
 	2:  language.German,
 	3:  language.French,
@@ -16,7 +16,7 @@ var OpenttdLanguages = map[int]language.Tag{
 	7:  language.Czech,
 	8:  language.Danish,
 	9:  language.Dutch,
-	10: language.Tag{}, // Esperanto
+	10: {}, // Esperanto
 	11: language.Finnish,
 	12: language.Hungarian,
 	13: language.Icelandic,
@@ -39,10 +39,10 @@ var OpenttdLanguages = map[int]language.Tag{
 	30: language.Croatian,
 	31: language.Catalan,
 	32: language.Estonian,
-	33: language.Tag{}, // Galican
+	33: {}, // Galican
 	34: language.Greek,
 	35: language.Latvian,
-	36: language.Tag{}, // Count (afaict a marker of the last language, effectively invalid)
+	36: {}, // Count (afaict a marker of the last language, effectively invalid)
 }
 
 var OpenttdEnvironments = map[int]string{

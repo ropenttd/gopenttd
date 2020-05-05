@@ -1,27 +1,8 @@
-package gopenttd
+package global
 
 import (
-	"net"
 	"time"
 )
-
-type GameConn interface {
-	Open() error
-	Close() error
-	Query() error
-}
-
-type OpenttdClientConnection struct {
-	Hostname   string
-	Port       int
-	Connection *net.UDPConn
-}
-
-type OpenttdAdminConnection struct {
-	Hostname   string
-	Port       int
-	Connection *net.TCPConn
-}
 
 type OpenttdNewgrf struct {
 	// Identifier is the NewGRF's ID. This should correspond to its ID on BaNaNaS.

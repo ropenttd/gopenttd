@@ -1,16 +1,17 @@
-package openttd_consts_admin
+package consts
 
 // As defined in https://github.com/OpenTTD/OpenTTD/blob/master/src/network/core/tcp_admin.h
 
-const UpdateTypeDate = 0
-const UpdateTypeClientInfo = 1
-const UpdateTypeCompanyInfo = 2
-const UpdateTypeCompanyEconomy = 3
-const UpdateTypeCompanyStats = 4
-const UpdateTypeChat = 5
-const UpdateTypeConsole = 6
-const UpdateTypeCmdNames = 7
-const UpdateTypeCmdLogging = 8
+const UpdateTypeDate uint8 = 0
+const UpdateTypeClientInfo uint8 = 1
+const UpdateTypeCompanyInfo uint8 = 2
+const UpdateTypeCompanyEconomy uint8 = 3
+const UpdateTypeCompanyStats uint8 = 4
+const UpdateTypeChat uint8 = 5
+const UpdateTypeConsole uint8 = 6
+const UpdateTypeCmdNames uint8 = 7
+const UpdateTypeCmdLogging uint8 = 8
+const UpdateTypeGamescript uint8 = 9
 
 const UpdateFrequencyPoll = 0x01
 const UpdateFrequencyDaily = 0x02

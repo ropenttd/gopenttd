@@ -1,9 +1,22 @@
-package gopenttd
+package helpers
 
 import (
 	"fmt"
 	"time"
 )
+
+func PackString(input string) (output []byte) {
+	output = []byte(input)
+
+	// Zero pad
+	output = append(output, byte(0))
+
+	return
+}
+
+func GetByteString(byteArray []byte) string {
+	return fmt.Sprintf("%x", byteArray)
+}
 
 // Below decoding stuff gleaned from the source, mostly https://github.com/OpenTTD/OpenTTD/blob/master/src/network/core/udp.h#L77
 // OttdDateFormat takes the number of days from the OpenTTD Epoch (the 1st of January 0000) and returns a UTC time object.
@@ -14,8 +27,4 @@ func OttdDateFormat(date uint32) (t time.Time) {
 	t = t.AddDate(0, 0, int(date))
 
 	return t
-}
-
-func getByteString(byteArray []byte) string {
-	return fmt.Sprintf("%x", byteArray)
 }

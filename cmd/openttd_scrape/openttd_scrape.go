@@ -18,8 +18,8 @@ var (
 )
 
 func init() {
-	flag.StringVar(&serverHost, "target.host", "localhost", "Show help menu")
-	flag.IntVar(&serverPort, "target.port", 3979, "Show version information")
+	flag.StringVar(&serverHost, "target.host", "localhost", "Target hostname or IP address.")
+	flag.IntVar(&serverPort, "target.port", 3979, "Target port (this should be the game connection port).")
 	flag.StringVar(&logLevel, "loglevel", "warn", "Set log level.")
 	flag.BoolVar(&prettyPrint, "prettyprint", false, "Pretty print resulting JSON.")
 	flag.BoolVar(&ignoreErrors, "ignore-errors", false, "Don't exit on connection errors and always output JSON.")

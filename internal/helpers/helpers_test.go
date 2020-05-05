@@ -1,4 +1,4 @@
-package gopenttd
+package helpers
 
 import (
 	"testing"
