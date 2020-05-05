@@ -30,6 +30,7 @@ func (p *ServerProtocol) Unpack(buffer *bytes.Buffer) (err error) {
 	var ver uint8
 	binary.Read(buffer, binary.LittleEndian, &ver)
 	p.Version = ver
+	p.Settings = map[uint16]uint16{}
 	var next bool
 	binary.Read(buffer, binary.LittleEndian, &next)
 	for next {
@@ -197,10 +198,24 @@ type ServerCmdNames struct { // Type 122
 	*         across different versions / revisions of OpenTTD.
 	*         Pack provided in this packet is for logging purposes only.
 	 */
+	Commands map[uint16]string // Map of the ID of the DoCommand with the name of it.
+}
 
-	More bool   // Pack to follow.
-	ID   uint16 // ID of the DoCommand.
-	Name string // Name of the DoCommand.
+func (p *ServerCmdNames) Unpack(buffer *bytes.Buffer) (err error) {
+	var next bool
+	p.Commands = map[uint16]string{}
+	binary.Read(buffer, binary.LittleEndian, &next)
+	for next {
+		// there are settings to read
+		var cmdSlot uint16
+		var cmdName string
+		binary.Read(buffer, binary.LittleEndian, &cmdSlot)
+		nvBytes, _ := buffer.ReadBytes(byte(0))
+		cmdName = string(bytes.Trim(nvBytes, "\x00"))
+		p.Commands[cmdSlot] = cmdName
+		binary.Read(buffer, binary.LittleEndian, &next)
+	}
+	return nil
 }
 
 type ServerCmdLogging struct { // Type 123

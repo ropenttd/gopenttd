@@ -9,21 +9,21 @@ import (
 func GetRequestPacketType(p packets.AdminRequestPacket) (uint8, error) {
 	switch p.(type) {
 	case packets.AdminJoin:
-		return 0, nil
+		return iAdminJoin, nil
 	case packets.AdminQuit:
-		return 1, nil
+		return iAdminQuit, nil
 	case packets.AdminUpdateFrequency:
-		return 2, nil
+		return iAdminUpdateFrequency, nil
 	case packets.AdminPoll:
-		return 3, nil
+		return iAdminPoll, nil
 	case packets.AdminChat:
-		return 4, nil
+		return iAdminChat, nil
 	case packets.AdminRcon:
-		return 5, nil
+		return iAdminRcon, nil
 	case packets.AdminGamescript:
-		return 6, nil
+		return iAdminGamescript, nil
 	case packets.AdminPing:
-		return 7, nil
+		return iAdminPing, nil
 	}
 	return 255, errors.New(fmt.Sprint("unknown packet type ", p))
 }

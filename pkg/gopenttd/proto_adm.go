@@ -107,6 +107,11 @@ func ScanServerAdm(host string, port int, password string) (err error) {
 		ID:   ^uint32(0),
 	})
 
+	obj.Writer.Write(packets.AdminPoll{
+		Type: consts.UpdateTypeCmdNames,
+		ID:   ^uint32(0),
+	})
+
 	for {
 		select {
 		case d := <-ch:

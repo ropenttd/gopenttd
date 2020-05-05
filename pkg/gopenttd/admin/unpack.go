@@ -54,26 +54,109 @@ func Unpack(data []byte) (packet packets.AdminResponsePacket, err error) {
 	reader := bytes.NewBuffer(data)
 	packetType := uint8(reader.Next(1)[0])
 	switch packetType {
-	case 103:
-		obj := packets.ServerProtocol{Settings: map[uint16]uint16{}}
+	// there's probably a better way to do this but oh well this is quite performant
+	case iServerFull:
+		obj := packets.ServerFull{}
+		packet = obj
+	case iServerBanned:
+		obj := packets.ServerBanned{}
+		packet = obj
+	case iServerError:
+		obj := packets.ServerError{}
+		err = genericUnpack(&obj, reader)
+		packet = obj
+	case iServerProtocol:
+		obj := packets.ServerProtocol{}
 		err = obj.Unpack(reader)
 		packet = obj
-	case 104:
+	case iServerWelcome:
 		obj := packets.ServerWelcome{}
 		err = genericUnpack(&obj, reader)
 		packet = obj
-	case 105:
+	case iServerNewgame:
 		obj := packets.ServerNewgame{}
 		packet = obj
-	case 106:
+	case iServerShutdown:
 		obj := packets.ServerShutdown{}
 		packet = obj
-	case 107:
+	case iServerDate:
 		obj := packets.ServerDate{}
 		err = genericUnpack(&obj, reader)
 		packet = obj
-	case 108:
+	case iServerClientJoin:
 		obj := packets.ServerClientJoin{}
+		err = genericUnpack(&obj, reader)
+		packet = obj
+	case iServerClientInfo:
+		obj := packets.ServerClientInfo{}
+		err = genericUnpack(&obj, reader)
+		packet = obj
+	case iServerClientUpdate:
+		obj := packets.ServerClientUpdate{}
+		err = genericUnpack(&obj, reader)
+		packet = obj
+	case iServerClientQuit:
+		obj := packets.ServerClientQuit{}
+		err = genericUnpack(&obj, reader)
+		packet = obj
+	case iServerClientError:
+		obj := packets.ServerClientError{}
+		err = genericUnpack(&obj, reader)
+		packet = obj
+	case iServerCompanyNew:
+		obj := packets.ServerCompanyNew{}
+		err = genericUnpack(&obj, reader)
+		packet = obj
+	case iServerCompanyInfo:
+		obj := packets.ServerCompanyInfo{}
+		err = genericUnpack(&obj, reader)
+		packet = obj
+	case iServerCompanyUpdate:
+		obj := packets.ServerCompanyUpdate{}
+		err = genericUnpack(&obj, reader)
+		packet = obj
+	case iServerCompanyRemove:
+		obj := packets.ServerCompanyRemove{}
+		err = genericUnpack(&obj, reader)
+		packet = obj
+	case iServerCompanyEconomy:
+		obj := packets.ServerCompanyEconomy{}
+		err = genericUnpack(&obj, reader)
+		packet = obj
+	case iServerCompanyStats:
+		obj := packets.ServerCompanyStats{}
+		err = genericUnpack(&obj, reader)
+		packet = obj
+	case iServerChat:
+		obj := packets.ServerChat{}
+		err = genericUnpack(&obj, reader)
+		packet = obj
+	case iServerRcon:
+		obj := packets.ServerRcon{}
+		err = genericUnpack(&obj, reader)
+		packet = obj
+	case iServerCmdNames:
+		obj := packets.ServerCmdNames{}
+		err = obj.Unpack(reader)
+		packet = obj
+	case iServerCmdLogging:
+		obj := packets.ServerCmdLogging{}
+		err = genericUnpack(&obj, reader)
+		packet = obj
+	case iServerGamescript:
+		obj := packets.ServerGamescript{}
+		err = genericUnpack(&obj, reader)
+		packet = obj
+	case iServerRconEnd:
+		obj := packets.ServerRconEnd{}
+		err = genericUnpack(&obj, reader)
+		packet = obj
+	case iServerConsole:
+		obj := packets.ServerConsole{}
+		err = genericUnpack(&obj, reader)
+		packet = obj
+	case iServerPong:
+		obj := packets.ServerPong{}
 		err = genericUnpack(&obj, reader)
 		packet = obj
 	}
