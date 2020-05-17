@@ -6,24 +6,24 @@ import (
 	"github.com/ropenttd/gopenttd/pkg/gopenttd/admin/packets"
 )
 
-func GetRequestPacketType(p packets.AdminRequestPacket) (uint8, error) {
+func GetRequestPacketType(p packets.AdminRequestPacket) (AdminPacketIndex, error) {
 	switch p.(type) {
 	case packets.AdminJoin:
-		return iAdminJoin, nil
+		return PacketAdminJoin, nil
 	case packets.AdminQuit:
-		return iAdminQuit, nil
+		return PacketAdminQuit, nil
 	case packets.AdminUpdateFrequency:
-		return iAdminUpdateFrequency, nil
+		return PacketAdminUpdateFrequency, nil
 	case packets.AdminPoll:
-		return iAdminPoll, nil
+		return PacketAdminPoll, nil
 	case packets.AdminChat:
-		return iAdminChat, nil
+		return PacketAdminChat, nil
 	case packets.AdminRcon:
-		return iAdminRcon, nil
+		return PacketAdminRcon, nil
 	case packets.AdminGamescript:
-		return iAdminGamescript, nil
+		return PacketAdminGamescript, nil
 	case packets.AdminPing:
-		return iAdminPing, nil
+		return PacketAdminPing, nil
 	}
 	return 255, errors.New(fmt.Sprint("unknown packet type ", p))
 }

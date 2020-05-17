@@ -1,40 +1,42 @@
 package admin
 
+type AdminPacketIndex uint8
+
 // Client packets
-const iAdminJoin uint8 = 0
-const iAdminQuit uint8 = 1
-const iAdminUpdateFrequency uint8 = 2
-const iAdminPoll uint8 = 3
-const iAdminChat uint8 = 4
-const iAdminRcon uint8 = 5
-const iAdminGamescript uint8 = 6
-const iAdminPing uint8 = 7
+const PacketAdminJoin AdminPacketIndex = 0
+const PacketAdminQuit AdminPacketIndex = 1
+const PacketAdminUpdateFrequency AdminPacketIndex = 2
+const PacketAdminPoll AdminPacketIndex = 3
+const PacketAdminChat AdminPacketIndex = 4
+const PacketAdminRcon AdminPacketIndex = 5
+const PacketAdminGamescript AdminPacketIndex = 6
+const PacketAdminPing AdminPacketIndex = 7
 
 // Server packets
-const iServerFull uint8 = 100
-const iServerBanned uint8 = 101
-const iServerError uint8 = 102
-const iServerProtocol uint8 = 103
-const iServerWelcome uint8 = 104
-const iServerNewgame uint8 = 105
-const iServerShutdown uint8 = 106
-const iServerDate uint8 = 107
-const iServerClientJoin uint8 = 108
-const iServerClientInfo uint8 = 109
-const iServerClientUpdate uint8 = 110
-const iServerClientQuit uint8 = 111
-const iServerClientError uint8 = 112
-const iServerCompanyNew uint8 = 113
-const iServerCompanyInfo uint8 = 114
-const iServerCompanyUpdate uint8 = 115
-const iServerCompanyRemove uint8 = 116
-const iServerCompanyEconomy uint8 = 117
-const iServerCompanyStats uint8 = 118
-const iServerChat uint8 = 119
-const iServerRcon uint8 = 120
-const iServerConsole uint8 = 121
-const iServerCmdNames uint8 = 122
-const iServerCmdLogging uint8 = 123
-const iServerGamescript uint8 = 124
-const iServerRconEnd uint8 = 125
-const iServerPong uint8 = 126
+const PacketServerFull AdminPacketIndex = 100
+const PacketServerBanned AdminPacketIndex = 101
+const PacketServerError AdminPacketIndex = 102
+const PacketServerProtocol AdminPacketIndex = 103
+const PacketServerWelcome AdminPacketIndex = 104
+const PacketServerNewgame AdminPacketIndex = 105
+const PacketServerShutdown AdminPacketIndex = 106
+const PacketServerDate AdminPacketIndex = 107
+const PacketServerClientJoin AdminPacketIndex = 108
+const PacketServerClientInfo AdminPacketIndex = 109
+const PacketServerClientUpdate AdminPacketIndex = 110
+const PacketServerClientQuit AdminPacketIndex = 111
+const PacketServerClientError AdminPacketIndex = 112
+const PacketServerCompanyNew AdminPacketIndex = 113
+const PacketServerCompanyInfo AdminPacketIndex = 114
+const PacketServerCompanyUpdate AdminPacketIndex = 115
+const PacketServerCompanyRemove AdminPacketIndex = 116
+const PacketServerCompanyEconomy AdminPacketIndex = 117
+const PacketServerCompanyStats AdminPacketIndex = 118
+const PacketServerChat AdminPacketIndex = 119
+const PacketServerRcon AdminPacketIndex = 120
+const PacketServerConsole AdminPacketIndex = 121
+const PacketServerCmdNames AdminPacketIndex = 122
+const PacketServerCmdLogging AdminPacketIndex = 123
+const PacketServerGamescript AdminPacketIndex = 124
+const PacketServerRconEnd AdminPacketIndex = 125
+const PacketServerPong AdminPacketIndex = 126

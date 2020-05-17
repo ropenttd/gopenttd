@@ -1,4 +1,4 @@
-package global
+package gopenttd
 
 import (
 	"bytes"
@@ -11,7 +11,7 @@ import (
 )
 
 // populateServerState populates an OpenttdServerState struct with data parsed from the Info request in the buffer.
-func (server *OpenttdServerState) PopulateServerState(buf *bytes.Buffer) {
+func (server *OpenttdServerState) populateServerState(buf *bytes.Buffer) {
 	// Props to https://github.com/vorot93/grokstat/blob/master/protocol_openttds.go for most of this code
 
 	var protocolVer = int(buf.Next(1)[0])
@@ -65,16 +65,16 @@ func (server *OpenttdServerState) PopulateServerState(buf *bytes.Buffer) {
 	mapWidth := binary.LittleEndian.Uint16(buf.Next(2))
 	mapHeight := binary.LittleEndian.Uint16(buf.Next(2))
 
-	mapSet := int(buf.Next(1)[0])
+	mapSet := uint8(buf.Next(1)[0])
 	dedicatedServer := int(buf.Next(1)[0])
 
 	server.Status = true
 	server.Dedicated = !(dedicatedServer == 0)
 	server.Name = fmt.Sprint(serverName)
 	server.Version = fmt.Sprint(serverVersion)
-	server.Language = languageId
+	server.Language = OpenttdLanguage(languageId)
 	server.NeedPass = needPass
-	server.Environment = mapSet
+	server.Environment = OpenttdEnvironment(mapSet)
 	server.Map = mapName
 	server.MapWidth = mapWidth
 	server.MapHeight = mapHeight
@@ -91,7 +91,7 @@ func (server *OpenttdServerState) PopulateServerState(buf *bytes.Buffer) {
 }
 
 // populateCompanyState populates an OpenttdServerState struct with company data.
-func (server *OpenttdServerState) PopulateCompanyState(buf *bytes.Buffer) {
+func (server *OpenttdServerState) populateCompanyState(buf *bytes.Buffer) {
 	// Props to https://github.com/sonicsnes/node-gamedig/blob/master/protocols/openttd.js for most of this code
 
 	var protocolVer = int(buf.Next(1)[0])
@@ -126,9 +126,10 @@ func (server *OpenttdServerState) PopulateCompanyState(buf *bytes.Buffer) {
 			company.Stations.Aircraft = binary.LittleEndian.Uint16(buf.Next(2))
 			company.Stations.Ship = binary.LittleEndian.Uint16(buf.Next(2))
 
+			// this never appears to have any data in it?
 			clientsBytes, _ := buf.ReadBytes(byte(0))
-			clients := bytes.Trim(clientsBytes, "\x00")
-			log.Debug(clients)
+			_ = bytes.Trim(clientsBytes, "\x00")
+			// log.Debugf("Clients in company %v: %v", company.Id, clients)
 
 			companies = append(companies, company)
 		}

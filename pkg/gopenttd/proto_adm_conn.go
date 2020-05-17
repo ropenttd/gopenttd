@@ -12,7 +12,6 @@ import (
 	log "github.com/sirupsen/logrus"
 	"io"
 	"net"
-	"sync"
 )
 
 type OpenttdAdminConnection struct {
@@ -21,61 +20,137 @@ type OpenttdAdminConnection struct {
 	ClientName string
 	Password   string
 	Connection *net.TCPConn
-	Reader     *PacketReader
-	Writer     *PacketWriter
+	Reader     *packetReader
+	Writer     *packetWriter
 
-	handlers      []chan packets.AdminResponsePacket
-	handlersMutex sync.RWMutex
+	callbacks CallbackMux
 
 	// Set if the server has an active connection and has authenticated successfully.
 	connected bool
 }
 
-func (c *OpenttdAdminConnection) Subscribe(ch chan packets.AdminResponsePacket) {
-	c.handlersMutex.Lock()
-	c.handlers = append(c.handlers, ch)
-	log.Debugf("Subscribing handler")
-	c.handlersMutex.Unlock()
+func NewAdminConnection(hostname string, port int, password string, clientname string) (connection OpenttdAdminConnection) {
+	connection.Hostname = hostname
+	connection.Port = port
+	connection.Password = password
+	connection.ClientName = clientname
+	return
 }
 
-func (c *OpenttdAdminConnection) Unsubscribe(ch chan packets.AdminResponsePacket) {
-	c.handlersMutex.Lock()
-	if c.handlers != nil {
-		for i := range c.handlers {
-			if c.handlers[i] == ch {
-				c.handlers = append(c.handlers[:i], c.handlers[i+1:]...)
-				break
-			}
-		}
+func (c *OpenttdAdminConnection) Open() (err error) {
+	if c.Connection != nil || c.connected {
+		// We're already connected
+		return nil
 	}
-	log.Debugf("Unsubscribing handler")
-	c.handlersMutex.Unlock()
+	// Determine the correct TCP address
+	server := fmt.Sprintf("%s:%d", c.Hostname, c.Port) // "255.255.255.255", 10000
+	serverAddr, err := net.ResolveTCPAddr("tcp", server)
+	if err != nil {
+		return err
+	}
+
+	// Open the connection
+	c.Connection, err = net.DialTCP("tcp", nil, serverAddr)
+	if err != nil {
+		return err
+	}
+	c.Reader = newPacketReader(c.Connection)
+	c.Writer = newPacketWriter(c.Connection)
+
+	log.Info("Admin connection open to ", server)
+	err = c.auth()
+	if err != nil {
+		c.Close()
+		log.Error(err)
+	}
+	return
 }
 
-func (c *OpenttdAdminConnection) publish(packet packets.AdminResponsePacket) {
-	c.handlersMutex.RLock()
-	// this is done because the slices refer to same array even though they are passed by value
-	// thus we are creating a new slice with our elements thus preserve locking correctly.
-	channels := append([]chan packets.AdminResponsePacket{}, c.handlers...)
-	go func(packet packets.AdminResponsePacket, channels []chan packets.AdminResponsePacket) {
-		for _, ch := range channels {
-			ch <- packet
-		}
-	}(packet, channels)
-	c.handlersMutex.RUnlock()
+func (c *OpenttdAdminConnection) auth() (err error) {
+	log.Info("Authenticating with ", c.Hostname)
+	pack := packets.AdminJoin{
+		Password:   c.Password,
+		ClientName: c.ClientName,
+		Version:    "testing",
+	}
+	c.Writer.Write(pack)
+
+	// Watch the first packet ourselves (yes I'm aware this is a little hacky)
+	packet, err := c.readPacket()
+
+	if err == io.EOF {
+		// Some kind of connection error
+		return errAuthentication
+	} else if err != nil {
+		log.Error("Read error during connection: ", err)
+		return err
+	}
+
+	switch packet.(type) {
+	case *packets.ServerProtocol:
+		log.Info("Authenticated successfully")
+		c.connected = true
+	case *packets.ServerFull:
+		return errors.New("server reported authentication failure - server full")
+	case *packets.ServerBanned:
+		return errors.New("server reported authentication failure - banned")
+	case *packets.ServerError:
+		return errors.New("server reported authentication failure - server error")
+	case *packets.ServerShutdown:
+		return errors.New("server reported authentication failure - server shutting down")
+	default:
+		return errors.New("unexpected initial packet")
+	}
+
+	return
 }
 
-type PacketReader struct {
+func (c *OpenttdAdminConnection) Close() (err error) {
+	c.Writer.Write(packets.AdminQuit{})
+	log.Infof("Connection to %s:%d closed", c.Hostname, c.Port)
+	c.connected = false
+	return c.Connection.Close()
+}
+
+// readPacket is a non-public packet reader which does not check if the connection is open.
+func (c *OpenttdAdminConnection) readPacket() (packet packets.AdminResponsePacket, err error) {
+	data, err := c.Reader.Read()
+
+	if err != nil {
+		// Some kind of connection error
+		log.Error("Read error: ", err)
+		return nil, err
+	}
+
+	packet, err = c.handlePacket(data)
+
+	if err != nil {
+		// Some kind of connection error
+		log.Error("Unmarshal error: ", err)
+		return nil, err
+	}
+
+	return packet, err
+}
+
+func (c *OpenttdAdminConnection) ReadPacket() (packet packets.AdminResponsePacket, err error) {
+	if !c.connected {
+		return nil, errNotConnected
+	}
+	return c.readPacket()
+}
+
+type packetReader struct {
 	reader *bufio.Reader
 }
 
-func NewPacketReader(reader io.Reader) *PacketReader {
-	return &PacketReader{
+func newPacketReader(reader io.Reader) *packetReader {
+	return &packetReader{
 		reader: bufio.NewReader(reader),
 	}
 }
 
-func (r *PacketReader) Read() (packet packets.AdminResponsePacket, err error) {
+func (r *packetReader) Read() (packet []byte, err error) {
 	// Read the first part
 	lengthBytes := make([]byte, 2)
 	_, err = r.reader.Read(lengthBytes)
@@ -103,20 +178,20 @@ func (r *PacketReader) Read() (packet packets.AdminResponsePacket, err error) {
 		return nil, errors.New(fmt.Sprint("invalid reported buffer length: got ", readLen, ", expected ", packLength))
 	}
 
-	return admin.Unpack(data)
+	return data, nil
 }
 
-type PacketWriter struct {
+type packetWriter struct {
 	writer io.Writer
 }
 
-func NewPacketWriter(writer io.Writer) *PacketWriter {
-	return &PacketWriter{
+func newPacketWriter(writer io.Writer) *packetWriter {
+	return &packetWriter{
 		writer: writer,
 	}
 }
 
-func (w *PacketWriter) Write(packet packets.AdminRequestPacket) (err error) {
+func (w *packetWriter) Write(packet packets.AdminRequestPacket) (err error) {
 	// Build the packet
 	data := packet.Pack()
 	msg := new(bytes.Buffer)
@@ -128,7 +203,7 @@ func (w *PacketWriter) Write(packet packets.AdminRequestPacket) (err error) {
 	if err != nil {
 		return err
 	}
-	msg.WriteByte(packetType)
+	msg.WriteByte(uint8(packetType))
 	msg.Write(data.Bytes())
 
 	sendLen, err := w.writer.Write(msg.Bytes())

@@ -16,6 +16,8 @@ go run github.com/ropenttd/gopenttd/cmd/openttd_scrape
 
 ## API
 
+**This library is under heavy development, and is not in the slightest bit stable. Things will change and will drastically break your code, I guarantee it.**
+
 There are two APIs:
 * the client protocol, which is a UDP-based polling protocol (i.e one shot) and can communicate with any server
 * the Admin protocol, which is a TCP based protocol with significantly more capability, but requires that you have the admin password of the server you are connecting to.

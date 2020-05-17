@@ -1,94 +1,168 @@
+// Package gopenttd provides utilities for communicating with OpenTTD game servers in various ways.
 package gopenttd
 
 import (
-	"errors"
 	"golang.org/x/text/language"
 )
 
-var OpenttdLanguages = map[int]language.Tag{
-	0:  {}, // Any
-	1:  language.English,
-	2:  language.German,
-	3:  language.French,
-	4:  language.BrazilianPortuguese,
-	5:  language.Bulgarian,
-	6:  language.Chinese,
-	7:  language.Czech,
-	8:  language.Danish,
-	9:  language.Dutch,
-	10: {}, // Esperanto
-	11: language.Finnish,
-	12: language.Hungarian,
-	13: language.Icelandic,
-	14: language.Italian,
-	15: language.Japanese,
-	16: language.Korean,
-	17: language.Lithuanian,
-	18: language.Norwegian,
-	19: language.Polish,
-	20: language.Portuguese,
-	21: language.Romanian,
-	22: language.Russian,
-	23: language.Slovak,
-	24: language.Slovenian,
-	25: language.Spanish,
-	26: language.Swedish,
-	27: language.Turkish,
-	28: language.Ukrainian,
-	29: language.Afrikaans,
-	30: language.Croatian,
-	31: language.Catalan,
-	32: language.Estonian,
-	33: {}, // Galican
-	34: language.Greek,
-	35: language.Latvian,
-	36: {}, // Count (afaict a marker of the last language, effectively invalid)
-}
+type OpenttdLanguage uint8
 
-var OpenttdEnvironments = map[int]string{
-	0: "Temperate",
-	1: "Arctic",
-	2: "Tropic",
-	3: "Toyland",
-}
+const (
+	LanguageAny OpenttdLanguage = iota
+	LanguageEnglish
+	LanguageGerman
+	LanguageFrench
+	LanguageBrazilianPortuguese
+	LanguageBulgarian
+	LanguageChinese
+	LanguageCzech
+	LanguageDanish
+	LanguageDutch
+	LanguageEsperanto
+	LanguageFinnish
+	LanguageHungarian
+	LanguageIcelandic
+	LanguageItalian
+	LanguageJapanese
+	LanguageKorean
+	LanguageLithuanian
+	LanguageNorwegian
+	LanguagePolish
+	LanguagePortuguese
+	LanguageRomanian
+	LanguageRussian
+	LanguageSlovak
+	LanguageSloveninan
+	LanguageSpanish
+	LanguageSwedish
+	LanguageTurkish
+	LanguageUkraninan
+	LanguageAfrikaans
+	LanguageCroatian
+	LanguageCatalan
+	LanguageEstonian
+	LanguageGalican
+	LanguageGreek
+	LanguageLatvian
+	LanguageCount
+)
 
-// GetISOLanguage returns a language.Tag associated with the given language code.
-// Note: The language codes "any", "esperanto", and "galican" do not presently have language tags in the Language library - an empty tag will be returned for these!
-func GetISOLanguage(langcode int) (lang language.Tag, error error) {
-	if val, ok := OpenttdLanguages[langcode]; ok {
-		return val, nil
-	} else {
-		return language.Tag{}, errors.New("not a valid language identifier")
+// String returns the string representation of the Language.
+func (lang OpenttdLanguage) String() string {
+	names := [...]string{
+		"Any",
+		"English",
+		"German",
+		"French",
+		"BrazilianPortuguese",
+		"Bulgarian",
+		"Chinese",
+		"Czech",
+		"Danish",
+		"Dutch",
+		"Esperanto",
+		"Finnish",
+		"Hungarian",
+		"Icelandic",
+		"Italian",
+		"Japanese",
+		"Korean",
+		"Lithuanian",
+		"Norwegian",
+		"Polish",
+		"Portuguese",
+		"Romanian",
+		"Russian",
+		"Slovak",
+		"Slovenian",
+		"Spanish",
+		"Swedish",
+		"Turkish",
+		"Ukrainian",
+		"Afrikaans",
+		"Croatian",
+		"Catalan",
+		"Estonian",
+		"Galican",
+		"Greek",
+		"Latvian",
 	}
+	// prevent panics for out of range lookups
+	if lang < LanguageAny || lang > LanguageLatvian {
+		return "Unknown"
+	}
+	return names[lang]
 }
 
-// GetLanguage returns the english language name associated with the given language code.
-func GetLanguage(langcode int) (lang string, error error) {
-	if val, ok := OpenttdLanguages[langcode]; ok {
-		// special cases
-		switch langcode {
-		case 0:
-			return "Any", nil
-		case 10:
-			return "Esperanto", nil
-		case 33:
-			return "Galican", nil
-		case 36:
-			// invalid? whatever, return what they want
-			return "Count", nil
-		default:
-			return val.String(), nil
-		}
-	} else {
-		return "", errors.New("not a valid language identifier")
+// Tag returns a language.Tag corresponding to the given OpenttdLanguage.
+// Important: If a tag is not available (for example, the Any language, or if the language doesn't exist in the text/language library),
+// this will return an empty Tag{}.
+func (lang OpenttdLanguage) Tag() language.Tag {
+	tags := [...]language.Tag{
+		language.Tag{},
+		language.English,
+		language.German,
+		language.French,
+		language.BrazilianPortuguese,
+		language.Bulgarian,
+		language.Chinese,
+		language.Czech,
+		language.Danish,
+		language.Dutch,
+		language.Tag{}, // Esperanto
+		language.Finnish,
+		language.Hungarian,
+		language.Icelandic,
+		language.Italian,
+		language.Japanese,
+		language.Korean,
+		language.Lithuanian,
+		language.Norwegian,
+		language.Polish,
+		language.Portuguese,
+		language.Romanian,
+		language.Russian,
+		language.Slovak,
+		language.Slovenian,
+		language.Spanish,
+		language.Swedish,
+		language.Turkish,
+		language.Ukrainian,
+		language.Afrikaans,
+		language.Croatian,
+		language.Catalan,
+		language.Estonian,
+		language.Tag{}, // Galican
+		language.Greek,
+		language.Latvian,
 	}
+	// prevent panics for out of range lookups
+	if lang < LanguageAny || lang > LanguageLatvian {
+		return language.Tag{}
+	}
+	return tags[lang]
 }
 
-// GetEnvironment returns the english environment name associated with the given environment code.
-func GetEnvironment(envcode int) (environment string, error error) {
-	if val, ok := OpenttdEnvironments[envcode]; ok {
-		return val, nil
-	} else {
-		return "", errors.New("not a valid environment identifier")
+type OpenttdEnvironment uint8
+
+const (
+	EnvironmentTemperate OpenttdEnvironment = iota
+	EnvironmentArctic
+	EnvironmentTropic
+	EnvironmentToyland
+)
+
+// String returns the string representation of the Environment.
+func (env OpenttdEnvironment) String() string {
+	names := [...]string{
+		"Temperate",
+		"Arctic",
+		"Tropic",
+		"Toyland",
 	}
+	// prevent panics for out of range lookups
+	if env < EnvironmentTemperate || env > EnvironmentToyland {
+		return "Unknown"
+	}
+	return names[env]
 }
