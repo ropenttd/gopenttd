@@ -1,4 +1,4 @@
-![](assets/logo.png | width=250)
+![](assets/logo_250.png)
 
 [![](https://godoc.org/github.com/ropenttd/gopenttd?status.svg)](https://godoc.org/github.com/ropenttd/gopenttd)
 
