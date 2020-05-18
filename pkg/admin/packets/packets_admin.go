@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"github.com/ropenttd/gopenttd/internal/helpers"
+	"github.com/ropenttd/gopenttd/pkg/admin/enum"
 )
 
 // As defined in https://github.com/OpenTTD/OpenTTD/blob/master/src/network/core/tcp_admin.h
@@ -35,8 +36,8 @@ func (p AdminQuit) Pack() (out bytes.Buffer) {
 }
 
 type AdminUpdateFrequency struct { // Type 2
-	Type      uint16 // Update type (see #AdminUpdateType).
-	Frequency uint16 // Update frequency (see #AdminUpdateFrequency), setting #ADMIN_FREQUENCY_POLL is always ignored.
+	Type      enum.UpdateFrequency // Update type (see #AdminUpdateType).
+	Frequency uint16               // Update frequency (see #AdminUpdateFrequency), setting #ADMIN_FREQUENCY_POLL is always ignored.
 }
 
 func (p AdminUpdateFrequency) Pack() (out bytes.Buffer) {
@@ -46,8 +47,8 @@ func (p AdminUpdateFrequency) Pack() (out bytes.Buffer) {
 }
 
 type AdminPoll struct { // Type 3
-	Type uint8  // #AdminUpdateType the server should answer for, only if #AdminUpdateFrequency #ADMIN_FREQUENCY_POLL is advertised in the PROTOCOL packet.
-	ID   uint32 // uint32  ID relevant to the packet type, e.g.
+	Type enum.UpdateType // #AdminUpdateType the server should answer for, only if #AdminUpdateFrequency #ADMIN_FREQUENCY_POLL is advertised in the PROTOCOL packet.
+	ID   uint32          // uint32  ID relevant to the packet type, e.g.
 	// - the client ID for #ADMIN_UPDATE_CLIENT_INFO. Use UINT32_MAX to show all clients.
 	// - the company ID for #ADMIN_UPDATE_COMPANY_INFO. Use UINT32_MAX to show all companies.
 }

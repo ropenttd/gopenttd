@@ -1,8 +1,10 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
-	"github.com/ropenttd/gopenttd/pkg/gopenttd"
+	"fmt"
+	gopenttd "github.com/ropenttd/gopenttd/pkg/admin"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -31,8 +33,18 @@ func main() {
 		log.Fatal(err)
 	}
 	log.SetLevel(parsedLevel)
-	err = gopenttd.ScanServerAdm(serverHost, serverPort, serverPass)
+	state, err := gopenttd.ScanServerAdm(serverHost, serverPort, serverPass)
 	if err != nil && !ignoreErrors {
 		log.Fatal(err)
 	}
+	var b []byte
+	if prettyPrint {
+		b, err = json.MarshalIndent(state, "", "    ")
+	} else {
+		b, err = json.Marshal(state)
+	}
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(string(b))
 }

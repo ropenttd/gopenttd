@@ -1,4 +1,4 @@
-package gopenttd
+package query
 
 import (
 	"bytes"
@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/ropenttd/gopenttd/internal/openttd_packets_udp"
+	"github.com/ropenttd/gopenttd/pkg/util"
 	"net"
 	"time"
 
@@ -94,27 +95,27 @@ func (c *OpenttdClientConnection) Query(packetType uint8, expect uint8) (data *b
 
 // ScanServer takes a hostname and port and returns an OpenttdServerState struct containing the data available from it.
 // Connections time out after 10 seconds
-func ScanServer(host string, port int) (serverstate OpenttdServerState, err error) {
+func ScanServer(host string, port int) (serverstate util.OpenttdServerState, err error) {
 	obj := OpenttdClientConnection{Hostname: host, Port: port}
 	err = obj.Open()
 	if err != nil {
-		return OpenttdServerState{Status: false, Error: err}, err
+		return util.OpenttdServerState{Status: false, Error: err}, err
 	}
 	defer obj.Close()
 
 	// Let's get the initial set of data using CLIENT_FIND_SERVER
 	result, err := obj.Query(openttd_packets_udp.ClientFindServer, openttd_packets_udp.ServerResponse)
 	if err != nil {
-		return OpenttdServerState{Status: false, Error: err}, err
+		return util.OpenttdServerState{Status: false, Error: err}, err
 	}
-	serverstate = OpenttdServerState{Host: obj.Hostname}
-	serverstate.populateServerState(result)
+	serverstate = util.OpenttdServerState{Host: obj.Hostname}
+	serverstate.PopulateServerState(result)
 
 	// Then we get the company data using CLIENT_DETAIL_INFO
 	result, err = obj.Query(openttd_packets_udp.ClientDetailInfo, openttd_packets_udp.ServerDetailInfo)
 	if err != nil {
-		return OpenttdServerState{Status: false, Error: err}, err
+		return util.OpenttdServerState{Status: false, Error: err}, err
 	}
-	serverstate.populateCompanyState(result)
+	serverstate.PopulateCompanyState(result)
 	return
 }

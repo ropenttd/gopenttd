@@ -1,5 +1,5 @@
-// Package gopenttd provides utilities for communicating with OpenTTD game servers in various ways.
-package gopenttd
+// Package util provides structs and helpers for deciphering OpenTTD game data.
+package util
 
 import (
 	"golang.org/x/text/language"

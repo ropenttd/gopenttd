@@ -6,7 +6,7 @@ import (
 	"fmt"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/ropenttd/gopenttd/pkg/gopenttd"
+	gopenttd "github.com/ropenttd/gopenttd/pkg/query"
 )
 
 var (

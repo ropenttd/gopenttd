@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"github.com/ropenttd/gopenttd/pkg/admin/enum"
 	"reflect"
 )
 
@@ -40,6 +41,10 @@ func genericUnmarshal(p AdminResponsePacket, buffer *bytes.Buffer) (err error) {
 		case reflect.Uint32:
 			var nv uint32
 			nv = binary.LittleEndian.Uint32(buffer.Next(4))
+			f.Set(reflect.ValueOf(nv))
+		case reflect.Int64:
+			var nv int64
+			binary.Read(buffer, binary.LittleEndian, &nv)
 			f.Set(reflect.ValueOf(nv))
 		case reflect.Uint64:
 			var nv uint64
@@ -79,7 +84,7 @@ func (p *ServerBanned) Unmarshal(buffer *bytes.Buffer) (err error) {
 }
 
 type ServerError struct { // Type 102
-	ErrorCode uint8 // NetworkErrorCode the error caused.
+	ErrorCode enum.NetError // NetworkErrorCode the error caused.
 }
 
 func (p ServerError) String() string {
@@ -221,8 +226,8 @@ func (p *ServerClientQuit) Unmarshal(buffer *bytes.Buffer) (err error) {
 }
 
 type ServerClientError struct { // Type 112
-	ID    uint32 // ID of the client throwing the error.
-	Error uint8  // Error the client made (see NetworkErrorCode).
+	ID    uint32        // ID of the client throwing the error.
+	Error enum.NetError // Error the client made (see NetworkErrorCode).
 }
 
 func (p ServerClientError) String() string {

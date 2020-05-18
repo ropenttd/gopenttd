@@ -18,20 +18,25 @@ go run github.com/ropenttd/gopenttd/cmd/openttd_scrape
 
 **This library is under heavy development, and is not in the slightest bit stable. Things will change and will drastically break your code, I guarantee it.**
 
-There are two APIs:
-* the client protocol, which is a UDP-based polling protocol (i.e one shot) and can communicate with any server
-* the Admin protocol, which is a TCP based protocol with significantly more capability, but requires that you have the admin password of the server you are connecting to.
+There are three packages:
+* `util`, which has numerous helper functions and constants for things like colours
+* `query`, which utilizes OpenTTD's UDP-based polling game query protocol to glean basic information about a server without a password
+* `admin`, which uses OpenTTD's TCP based protocol with significantly more capability, but requires that you have the admin password for the server you are connecting to (You probably want this one if you're building a bot)
 
-Please see the [godoc](https://godoc.org/github.com/ropenttd/gopenttd) for further information on the API.
+Please see the [godoc](https://pkg.go.dev/github.com/ropenttd/gopenttd/pkg) for further information on all of these packages.
 
 ### Client Protocol
 
 Here's a brief example:
 ```go
-import "github.com/ropenttd/gopenttd/pkg/gopenttd"
+package main
 
-result, err := gopenttd.ScanServer("s1.ttdredd.it", 3979)
+import "github.com/ropenttd/gopenttd/pkg/query"
+
+result, err := query.ScanServer("s1.ttdredd.it", 3979)
 ```
+
+Please see the [godoc](https://pkg.go.dev/github.com/ropenttd/gopenttd/pkg/query) for further information.
 
 ### Admin Protocol
 
@@ -40,9 +45,11 @@ The Admin Protocol is a connection based protocol that you communicate to using 
 There is a helper "ScanServerAdm" function that acts very similarly to the ScanServer function, except it returns significantly more data.
 
 ```go
-import "github.com/ropenttd/gopenttd/pkg/gopenttd"
+package main
 
-result, err := gopenttd.ScanServerAdm("s1.ttdredd.it", 3977, "password")
+import "github.com/ropenttd/gopenttd/pkg/admin"
+
+result, err := admin.ScanServerAdm("s1.ttdredd.it", 3977, "password")
 ```
 
-Please see the [godoc](https://godoc.org/github.com/ropenttd/gopenttd) for help using the rest of the API.
+Please see the [godoc](https://pkg.go.dev/github.com/ropenttd/gopenttd/pkg/admin) for help using the rest of the Admin API.

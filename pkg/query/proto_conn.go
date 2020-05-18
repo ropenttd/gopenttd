@@ -1,4 +1,4 @@
-package gopenttd
+package query
 
 import "net"
 

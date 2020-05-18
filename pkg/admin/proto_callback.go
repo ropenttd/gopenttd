@@ -1,7 +1,7 @@
-package gopenttd
+package admin
 
 import (
-	"github.com/ropenttd/gopenttd/pkg/gopenttd/admin/packets"
+	"github.com/ropenttd/gopenttd/pkg/admin/packets"
 	"github.com/sirupsen/logrus"
 	"sync"
 )

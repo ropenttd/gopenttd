@@ -1,4 +1,4 @@
-package gopenttd
+package util
 
 import (
 	"time"
@@ -25,8 +25,6 @@ type OpenttdTypeCounts struct {
 }
 
 type OpenttdCompany struct {
-	// The ID of the company. Starts from 0.
-	Id uint8 `json:"id"`
 	// The company name.
 	Name string `json:"name"`
 	// The year the company was first founded.
@@ -36,7 +34,7 @@ type OpenttdCompany struct {
 	// The amount of disposable cash the company has.
 	Money uint64 `json:"cash"`
 	// The company's current income.
-	Income uint64 `json:"income"`
+	Income int64 `json:"income"`
 	// The company's performance index. Maximum score of 1000.
 	Performance uint16 `json:"performance"`
 	// Whether the company has a password set.
@@ -102,5 +100,5 @@ type OpenttdServerState struct {
 	NewgrfActive []OpenttdNewgrf `json:"newgrf_active"`
 
 	// Companies is a list of active company data, where available.
-	Companies []OpenttdCompany `json:"companies"`
+	Companies map[uint8]OpenttdCompany `json:"companies"`
 }

@@ -1,4 +1,4 @@
-package gopenttd
+package util
 
 import (
 	"bytes"
@@ -10,8 +10,8 @@ import (
 	"time"
 )
 
-// populateServerState populates an OpenttdServerState struct with data parsed from the Info request in the buffer.
-func (server *OpenttdServerState) populateServerState(buf *bytes.Buffer) {
+// PopulateServerState populates an OpenttdServerState struct with data parsed from the Info request in the buffer.
+func (server *OpenttdServerState) PopulateServerState(buf *bytes.Buffer) {
 	// Props to https://github.com/vorot93/grokstat/blob/master/protocol_openttds.go for most of this code
 
 	var protocolVer = int(buf.Next(1)[0])
@@ -90,17 +90,19 @@ func (server *OpenttdServerState) populateServerState(buf *bytes.Buffer) {
 	server.NewgrfActive = activeNewGRFsInfo
 }
 
-// populateCompanyState populates an OpenttdServerState struct with company data.
-func (server *OpenttdServerState) populateCompanyState(buf *bytes.Buffer) {
+// PopulateCompanyState populates an OpenttdServerState struct with company data.
+func (server *OpenttdServerState) PopulateCompanyState(buf *bytes.Buffer) {
 	// Props to https://github.com/sonicsnes/node-gamedig/blob/master/protocols/openttd.js for most of this code
 
 	var protocolVer = int(buf.Next(1)[0])
 	if protocolVer >= 6 {
-		var companies []OpenttdCompany
+		if server.Companies == nil {
+			server.Companies = map[uint8]OpenttdCompany{}
+		}
 		numCompanies := int(buf.Next(1)[0])
 		for i := 0; i < numCompanies; i++ {
 			company := OpenttdCompany{}
-			company.Id = uint8(buf.Next(1)[0])
+			id := uint8(buf.Next(1)[0])
 
 			rawCompanyName, _ := buf.ReadBytes(byte(0))
 			company.Name = string(bytes.Trim(rawCompanyName, "\x00"))
@@ -108,7 +110,7 @@ func (server *OpenttdServerState) populateCompanyState(buf *bytes.Buffer) {
 			company.YearStart = binary.LittleEndian.Uint32(buf.Next(4))
 			company.Value = binary.LittleEndian.Uint64(buf.Next(8))
 			company.Money = binary.LittleEndian.Uint64(buf.Next(8))
-			company.Income = binary.LittleEndian.Uint64(buf.Next(8))
+			binary.Read(buf, binary.LittleEndian, &company.Income)
 			company.Performance = binary.LittleEndian.Uint16(buf.Next(2))
 			company.Passworded = !(int(buf.Next(1)[0]) == 0)
 
@@ -131,9 +133,8 @@ func (server *OpenttdServerState) populateCompanyState(buf *bytes.Buffer) {
 			_ = bytes.Trim(clientsBytes, "\x00")
 			// log.Debugf("Clients in company %v: %v", company.Id, clients)
 
-			companies = append(companies, company)
+			server.Companies[id] = company
 		}
-		server.Companies = companies
 	} else {
 		log.Warn("Unable to decode company details on Protocol Version ", protocolVer)
 	}

@@ -1,4 +1,4 @@
-package gopenttd
+package admin
 
 import (
 	"bufio"
@@ -7,8 +7,8 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"github.com/ropenttd/gopenttd/pkg/gopenttd/admin"
-	"github.com/ropenttd/gopenttd/pkg/gopenttd/admin/packets"
+	"github.com/ropenttd/gopenttd/pkg/admin/packets"
+	"github.com/ropenttd/gopenttd/pkg/util"
 	log "github.com/sirupsen/logrus"
 	"io"
 	"net"
@@ -80,7 +80,7 @@ func (c *OpenttdAdminConnection) auth() (err error) {
 
 	if err == io.EOF {
 		// Some kind of connection error
-		return errAuthentication
+		return util.ErrAuthentication
 	} else if err != nil {
 		log.Error("Read error during connection: ", err)
 		return err
@@ -135,7 +135,7 @@ func (c *OpenttdAdminConnection) readPacket() (packet packets.AdminResponsePacke
 
 func (c *OpenttdAdminConnection) ReadPacket() (packet packets.AdminResponsePacket, err error) {
 	if !c.connected {
-		return nil, errNotConnected
+		return nil, util.ErrNotConnected
 	}
 	return c.readPacket()
 }
@@ -199,7 +199,7 @@ func (w *packetWriter) Write(packet packets.AdminRequestPacket) (err error) {
 	msgLength := uint16(data.Len() + 3)
 	binary.Write(msg, binary.LittleEndian, msgLength)
 
-	packetType, err := admin.GetRequestPacketType(packet)
+	packetType, err := getRequestPacketType(packet)
 	if err != nil {
 		return err
 	}
