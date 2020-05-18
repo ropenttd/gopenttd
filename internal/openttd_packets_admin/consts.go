@@ -1,4 +1,4 @@
-package admin
+package openttd_packets_admin
 
 import (
 	"errors"
@@ -51,7 +51,7 @@ const (
 	packetServerPong
 )
 
-func getRequestPacketType(p packets.AdminRequestPacket) (adminPacketIndex, error) {
+func GetRequestPacketType(p packets.AdminRequestPacket) (adminPacketIndex, error) {
 	switch p.(type) {
 	case packets.AdminJoin:
 		return packetAdminJoin, nil

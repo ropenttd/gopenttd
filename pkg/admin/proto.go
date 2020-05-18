@@ -6,27 +6,29 @@ import (
 	"github.com/ropenttd/gopenttd/pkg/admin/packets"
 	"github.com/ropenttd/gopenttd/pkg/util"
 	log "github.com/sirupsen/logrus"
+	"net"
 )
 
 // yes this is a globalvar sue me, it's the easiest way to provide this helper function
-// todo: move this out to cmd, and find a better carrier for more data than OpenttdServerState (maybe OpenttdAdminServerState?)
-var lstate *util.OpenttdServerState
+// todo: move this out to cmd
+var lstate *OpenttdExtendedServerState
 
 func handleServerWelcome(packet *packets.ServerWelcome, conn *OpenttdAdminConnection) {
+	lstate.Status = true
 	lstate.Name = packet.Name
 	lstate.Version = packet.Version
 	lstate.Dedicated = packet.Dedicated
 	lstate.Map = packet.Map
 	lstate.Seed = packet.Seed
 	lstate.Environment = util.OpenttdEnvironment(packet.Landscape)
-	lstate.DateStart = helpers.OttdDateFormat(packet.StartDate)
+	lstate.DateStart = util.DateFormat(packet.StartDate)
 	lstate.MapWidth = packet.MapWidth
 	lstate.MapHeight = packet.MapHeight
 	return
 }
 
 func handleServerDate(packet *packets.ServerDate, conn *OpenttdAdminConnection) {
-	lstate.DateCurrent = helpers.OttdDateFormat(packet.CurrentDate)
+	lstate.DateCurrent = util.DateFormat(packet.CurrentDate)
 	return
 }
 
@@ -35,19 +37,28 @@ func handleClientInfo(packet *packets.ServerClientInfo, conn *OpenttdAdminConnec
 		// it's the server
 		return
 	}
-	lstate.NumClients += 1
-	if packet.Company == 255 {
-		lstate.NumSpectators += 1
+	if lstate.Clients == nil {
+		lstate.Clients = map[uint32]OpenttdClient{}
 	}
+	client := OpenttdClient{}
+	client.Name = packet.Name
+	client.Company = packet.Company
+	client.Address = net.ParseIP(packet.Address)
+	client.JoinDate = util.DateFormat(packet.JoinDate)
+	client.Language = util.OpenttdLanguage(packet.Language)
+	lstate.Clients[packet.ID] = client
 	return
 }
 
 func handleCompanyInfo(packet *packets.ServerCompanyInfo, conn *OpenttdAdminConnection) {
 	if lstate.Companies == nil {
-		lstate.Companies = map[uint8]util.OpenttdCompany{}
+		lstate.Companies = map[uint8]OpenttdExtendedCompany{}
 	}
-	company := util.OpenttdCompany{}
+	company := OpenttdExtendedCompany{}
 	company.Name = packet.Name
+	company.Manager = packet.Manager
+	company.Colour = helpers.OpenttdColour(packet.Colour)
+	company.AI = packet.IsAI
 	company.YearStart = packet.StartDate
 	company.Passworded = packet.Password
 	lstate.Companies[packet.ID] = company
@@ -57,9 +68,15 @@ func handleCompanyInfo(packet *packets.ServerCompanyInfo, conn *OpenttdAdminConn
 func handleCompanyEconomy(packet *packets.ServerCompanyEconomy, conn *OpenttdAdminConnection) {
 	company := lstate.Companies[packet.ID]
 	company.Money = packet.Money
+	company.Loan = packet.Loan
 	company.Income = packet.Income
-	company.Value = packet.ValueLastQuarter
-	company.Performance = packet.PerformanceLastQuarter
+	company.CargoThisQuarter = packet.CargoThisQuarter
+	company.CargoLastQuarter = packet.CargoLastQuarter
+	company.CargoPreviousQuarter = packet.CargoPreviousQuarter
+	company.ValueLastQuarter = packet.ValueLastQuarter
+	company.ValuePreviousQuarter = packet.ValuePreviousQuarter
+	company.PerformanceLastQuarter = packet.PerformanceLastQuarter
+	company.PerformancePreviousQuarter = packet.PerformancePreviousQuarter
 	lstate.Companies[packet.ID] = company
 	return
 }
@@ -81,7 +98,7 @@ func handleCompanyStats(packet *packets.ServerCompanyStats, conn *OpenttdAdminCo
 }
 
 // ScanServer takes a hostname and port and returns an OpenttdServerState.struct containing the data available from it.
-func ScanServerAdm(host string, port int, password string) (state util.OpenttdServerState, err error) {
+func ScanServerAdm(host string, port int, password string) (state OpenttdExtendedServerState, err error) {
 	obj := NewAdminConnection(host, port, password, "gopenttd")
 
 	obj.RegWelcome(handleServerWelcome)
@@ -92,7 +109,7 @@ func ScanServerAdm(host string, port int, password string) (state util.OpenttdSe
 	obj.RegCompanyStats(handleCompanyStats)
 	err = obj.Open()
 	if err != nil {
-		return util.OpenttdServerState{}, err
+		return OpenttdExtendedServerState{}, err
 	}
 	defer obj.Close()
 
@@ -127,9 +144,9 @@ func ScanServerAdm(host string, port int, password string) (state util.OpenttdSe
 		Token: 65535,
 	})
 
-	lstate = &util.OpenttdServerState{}
+	lstate = &OpenttdExtendedServerState{}
 
-	var cont bool = true
+	var cont = true
 	for cont {
 		packet, err := obj.ReadPacket()
 		if err != nil {
@@ -142,6 +159,9 @@ func ScanServerAdm(host string, port int, password string) (state util.OpenttdSe
 			cont = false
 		}
 	}
+
+	// Update the player and company counts
+	lstate.updateCounts()
 
 	return *lstate, nil
 }

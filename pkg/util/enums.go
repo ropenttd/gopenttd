@@ -1,4 +1,3 @@
-// Package util provides structs and helpers for deciphering OpenTTD game data.
 package util
 
 import (

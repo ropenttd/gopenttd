@@ -30,8 +30,8 @@ func (server *OpenttdServerState) PopulateServerState(buf *bytes.Buffer) {
 	var timeCurrent time.Time
 	var timeStart time.Time
 	if protocolVer >= 3 {
-		timeCurrent = helpers.OttdDateFormat(binary.LittleEndian.Uint32(buf.Next(4)))
-		timeStart = helpers.OttdDateFormat(binary.LittleEndian.Uint32(buf.Next(4)))
+		timeCurrent = DateFormat(binary.LittleEndian.Uint32(buf.Next(4)))
+		timeStart = DateFormat(binary.LittleEndian.Uint32(buf.Next(4)))
 	}
 
 	var maxCompanies *int

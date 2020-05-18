@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/ropenttd/gopenttd/internal/openttd_packets_admin"
 	"github.com/ropenttd/gopenttd/pkg/admin/packets"
 	"github.com/ropenttd/gopenttd/pkg/util"
 	log "github.com/sirupsen/logrus"
@@ -199,7 +200,7 @@ func (w *packetWriter) Write(packet packets.AdminRequestPacket) (err error) {
 	msgLength := uint16(data.Len() + 3)
 	binary.Write(msg, binary.LittleEndian, msgLength)
 
-	packetType, err := getRequestPacketType(packet)
+	packetType, err := openttd_packets_admin.GetRequestPacketType(packet)
 	if err != nil {
 		return err
 	}
