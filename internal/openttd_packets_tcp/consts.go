@@ -5,10 +5,10 @@ package openttd_packets_tcp
 
 // Source: https://github.com/OpenTTD/OpenTTD/blob/master/src/network/core/tcp_game.h
 
-type tcpPacketIndex uint8
+type TcpPacketIndex uint8
 
 const (
-	ServerFull tcpPacketIndex = iota
+	ServerFull TcpPacketIndex = iota
 	ServerBanned
 	ClientJoin
 	ServerError

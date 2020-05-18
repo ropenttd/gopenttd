@@ -6,69 +6,69 @@ import (
 	"github.com/ropenttd/gopenttd/pkg/admin/packets"
 )
 
-type adminPacketIndex uint8
+type AdminPacketIndex uint8
 
 const (
 	// Client packets
-	packetAdminJoin adminPacketIndex = iota
-	packetAdminQuit
-	packetAdminUpdateFrequency
-	packetAdminPoll
-	packetAdminChat
-	packetAdminRcon
-	packetAdminGamescript
-	packetAdminPing
+	PacketAdminJoin AdminPacketIndex = iota
+	PacketAdminQuit
+	PacketAdminUpdateFrequency
+	PacketAdminPoll
+	PacketAdminChat
+	PacketAdminRcon
+	PacketAdminGamescript
+	PacketAdminPing
 )
 
 const (
 	// Server packets
-	packetServerFull adminPacketIndex = 100 + iota
-	packetServerBanned
-	packetServerError
-	packetServerProtocol
-	packetServerWelcome
-	packetServerNewgame
-	packetServerShutdown
-	packetServerDate
-	packetServerClientJoin
-	packetServerClientInfo
-	packetServerClientUpdate
-	packetServerClientQuit
-	packetServerClientError
-	packetServerCompanyNew
-	packetServerCompanyInfo
-	packetServerCompanyUpdate
-	packetServerCompanyRemove
-	packetServerCompanyEconomy
-	packetServerCompanyStats
-	packetServerChat
-	packetServerRcon
-	packetServerConsole
-	packetServerCmdNames
-	packetServerCmdLogging
-	packetServerGamescript
-	packetServerRconEnd
-	packetServerPong
+	PacketServerFull AdminPacketIndex = 100 + iota
+	PacketServerBanned
+	PacketServerError
+	PacketServerProtocol
+	PacketServerWelcome
+	PacketServerNewgame
+	PacketServerShutdown
+	PacketServerDate
+	PacketServerClientJoin
+	PacketServerClientInfo
+	PacketServerClientUpdate
+	PacketServerClientQuit
+	PacketServerClientError
+	PacketServerCompanyNew
+	PacketServerCompanyInfo
+	PacketServerCompanyUpdate
+	PacketServerCompanyRemove
+	PacketServerCompanyEconomy
+	PacketServerCompanyStats
+	PacketServerChat
+	PacketServerRcon
+	PacketServerConsole
+	PacketServerCmdNames
+	PacketServerCmdLogging
+	PacketServerGamescript
+	PacketServerRconEnd
+	PacketServerPong
 )
 
-func GetRequestPacketType(p packets.AdminRequestPacket) (adminPacketIndex, error) {
+func GetRequestPacketType(p packets.AdminRequestPacket) (AdminPacketIndex, error) {
 	switch p.(type) {
 	case packets.AdminJoin:
-		return packetAdminJoin, nil
+		return PacketAdminJoin, nil
 	case packets.AdminQuit:
-		return packetAdminQuit, nil
+		return PacketAdminQuit, nil
 	case packets.AdminUpdateFrequency:
-		return packetAdminUpdateFrequency, nil
+		return PacketAdminUpdateFrequency, nil
 	case packets.AdminPoll:
-		return packetAdminPoll, nil
+		return PacketAdminPoll, nil
 	case packets.AdminChat:
-		return packetAdminChat, nil
+		return PacketAdminChat, nil
 	case packets.AdminRcon:
-		return packetAdminRcon, nil
+		return PacketAdminRcon, nil
 	case packets.AdminGamescript:
-		return packetAdminGamescript, nil
+		return PacketAdminGamescript, nil
 	case packets.AdminPing:
-		return packetAdminPing, nil
+		return PacketAdminPing, nil
 	}
 	return 255, errors.New(fmt.Sprint("unknown packet type ", p))
 }

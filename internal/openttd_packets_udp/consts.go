@@ -3,11 +3,11 @@ package openttd_packets_udp
 // This is a list of constants defining the packet order for each of the given packets.
 // Source: https://github.com/OpenTTD/OpenTTD/blob/master/src/network/core/udp.h
 
-type tcpPacketIndex uint8
+type UdpPacketIndex uint8
 
 const (
 	// Client-server related
-	ClientFindServer tcpPacketIndex = iota
+	ClientFindServer UdpPacketIndex = iota
 	ServerResponse
 	ClientDetailInfo
 	ServerDetailInfo

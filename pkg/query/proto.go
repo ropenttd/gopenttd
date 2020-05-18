@@ -40,7 +40,7 @@ func (c *OpenttdClientConnection) Close() (err error) {
 	return c.Connection.Close()
 }
 
-func (c *OpenttdClientConnection) Query(packetType uint8, expect uint8) (data *bytes.Buffer, err error) {
+func (c *OpenttdClientConnection) Query(packetType openttd_packets_udp.UdpPacketIndex, expect openttd_packets_udp.UdpPacketIndex) (data *bytes.Buffer, err error) {
 	// this buffer _should_ be long enough? probably a better way of doing this than allocating a 2m bytearray
 	inBuf := make([]byte, 2048)
 	var readLen int
@@ -50,7 +50,7 @@ func (c *OpenttdClientConnection) Query(packetType uint8, expect uint8) (data *b
 	c.Connection.SetDeadline(time.Now().Add(timeout))
 
 	// send the Info request
-	discoverMsg := []byte{3, 0, packetType}
+	discoverMsg := []byte{3, 0, uint8(packetType)}
 	sendLen, err := c.Connection.Write(discoverMsg)
 	if err != nil {
 		return nil, err
@@ -85,7 +85,7 @@ func (c *OpenttdClientConnection) Query(packetType uint8, expect uint8) (data *b
 		return nil, errors.New(fmt.Sprint("invalid reported buffer length: got ", retLength, ", expected ", readLen))
 	}
 
-	retType := uint8(buffer.Next(1)[0])
+	retType := openttd_packets_udp.UdpPacketIndex(buffer.Next(1)[0])
 	if expect != retType {
 		return nil, errors.New(fmt.Sprint("unexpected response packet type: got ", retType, ", expected ", expect))
 	}
