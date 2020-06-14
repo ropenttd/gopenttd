@@ -5,7 +5,6 @@ import (
 	"encoding/binary"
 	"fmt"
 	"github.com/ropenttd/gopenttd/internal/helpers"
-	log "github.com/sirupsen/logrus"
 	"github.com/skybon/goutil"
 	"time"
 )
@@ -135,8 +134,6 @@ func (server *OpenttdServerState) PopulateCompanyState(buf *bytes.Buffer) {
 
 			server.Companies[id] = company
 		}
-	} else {
-		log.Warn("Unable to decode company details on Protocol Version ", protocolVer)
 	}
 
 }

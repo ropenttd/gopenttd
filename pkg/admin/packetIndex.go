@@ -1,0 +1,32 @@
+package admin
+
+const (
+	// Server packets
+	packetIndexServerFull = 100 + iota
+	packetIndexServerBanned
+	packetIndexServerError
+	packetIndexServerProtocol
+	packetIndexServerWelcome
+	packetIndexServerNewgame
+	packetIndexServerShutdown
+	packetIndexServerDate
+	packetIndexServerClientJoin
+	packetIndexServerClientInfo
+	packetIndexServerClientUpdate
+	packetIndexServerClientQuit
+	packetIndexServerClientError
+	packetIndexServerCompanyNew
+	packetIndexServerCompanyInfo
+	packetIndexServerCompanyUpdate
+	packetIndexServerCompanyRemove
+	packetIndexServerCompanyEconomy
+	packetIndexServerCompanyStats
+	packetIndexServerChat
+	packetIndexServerRcon
+	packetIndexServerConsole
+	packetIndexServerCmdNames
+	packetIndexServerCmdLogging
+	packetIndexServerGamescript
+	packetIndexServerRconEnd
+	packetIndexServerPong
+)

@@ -3,15 +3,12 @@ package query
 import (
 	"bytes"
 	"encoding/binary"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"github.com/ropenttd/gopenttd/internal/openttd_packets_udp"
 	"github.com/ropenttd/gopenttd/pkg/util"
 	"net"
 	"time"
-
-	log "github.com/sirupsen/logrus"
 )
 
 func (c *OpenttdClientConnection) Open() (err error) {
@@ -31,12 +28,10 @@ func (c *OpenttdClientConnection) Open() (err error) {
 	if err != nil {
 		return err
 	}
-	log.Info("Connection open to ", server)
 	return nil
 }
 
 func (c *OpenttdClientConnection) Close() (err error) {
-	log.Infof("Connection to %s:%d closed", c.Hostname, c.Port)
 	return c.Connection.Close()
 }
 
@@ -51,11 +46,10 @@ func (c *OpenttdClientConnection) Query(packetType openttd_packets_udp.UdpPacket
 
 	// send the Info request
 	discoverMsg := []byte{3, 0, uint8(packetType)}
-	sendLen, err := c.Connection.Write(discoverMsg)
+	_, err = c.Connection.Write(discoverMsg)
 	if err != nil {
 		return nil, err
 	}
-	log.Debug("Sent ", sendLen, " bytes")
 
 	for {
 		// Start a loop to read from UDP, and exit out if an error or timeout is experienced
@@ -73,8 +67,6 @@ func (c *OpenttdClientConnection) Query(packetType openttd_packets_udp.UdpPacket
 
 		if readLen != 0 {
 			// Success!
-			log.Debug("Read ", readLen, " bytes")
-			log.Debug("Response hexadecimal: ", hex.EncodeToString(inBuf))
 			break
 		}
 	}

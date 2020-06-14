@@ -1,3 +1,4 @@
+// openttd_adm_query is effectively a debugging tool that scans a given server over the admin port and dumps all available data.
 package main
 
 import (
@@ -6,37 +7,42 @@ import (
 	"fmt"
 	gopenttd "github.com/ropenttd/gopenttd/pkg/admin"
 	log "github.com/sirupsen/logrus"
+	"time"
 )
 
 var (
-	serverHost   string
-	serverPort   int
-	serverPass   string
-	logLevel     string
-	prettyPrint  bool
-	ignoreErrors bool
+	serverHost  string
+	serverPort  int
+	serverPass  string
+	prettyPrint bool
 )
 
 func init() {
-	flag.StringVar(&serverHost, "target.host", "188.40.223.196", "Target host to connect to.")
+	flag.StringVar(&serverHost, "target.host", "testserver.ttdredd.it", "Target host to connect to.")
 	flag.IntVar(&serverPort, "target.port", 3977, "Target port (this should be the admin port)")
 	flag.StringVar(&serverPass, "target.pass", "", "Target password")
-	flag.StringVar(&logLevel, "loglevel", "debug", "Set log level.")
 	flag.BoolVar(&prettyPrint, "prettyprint", false, "Pretty print resulting JSON.")
-	flag.BoolVar(&ignoreErrors, "ignore-errors", false, "Don't exit on connection errors and always output JSON.")
 	flag.Parse()
 }
 
 func main() {
-	parsedLevel, err := log.ParseLevel(logLevel)
+
+	s, err := gopenttd.New(serverHost, serverPort, serverPass)
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.SetLevel(parsedLevel)
-	state, err := gopenttd.ScanServerAdm(serverHost, serverPort, serverPass)
-	if err != nil && !ignoreErrors {
+	s.LogLevel = gopenttd.LogInformational
+
+	err = s.Open()
+	if err != nil {
 		log.Fatal(err)
 	}
+	defer s.Close()
+
+	// stupid delay to make sure things settle into state (? find a better way to do this)
+	time.Sleep(3 * time.Second)
+
+	state := s.State
 	var b []byte
 	if prettyPrint {
 		b, err = json.MarshalIndent(state, "", "    ")
