@@ -334,9 +334,76 @@ func (s *State) onCompanyRemove(se *Session, r *CompanyRemove) (err error) {
 	return err
 }
 
-// OnCompanyEconomy
+// OnCompanyEconomy updates the given company with economy statistics.
+func (s *State) onCompanyEconomy(se *Session, r *CompanyEconomy) (err error) {
+	if s == nil {
+		return ErrNilState
+	}
 
-// OnCompanyStats
+	s.Lock()
+	defer s.Unlock()
+
+	var com Company
+	if res, ok := s.Companies[r.ID]; ok {
+		// company in state
+		com = res
+	} else {
+		// company not in state
+		com = Company{}
+	}
+
+	com.Money = r.Money
+	com.Loan = r.Loan
+	com.Income = r.Income
+	com.CargoThisQuarter = r.CargoThisQuarter
+	com.ValueLastQuarter = r.ValueLastQuarter
+	com.PerformanceLastQuarter = r.PerformanceLastQuarter
+	com.CargoLastQuarter = r.CargoLastQuarter
+	com.ValuePreviousQuarter = r.ValuePreviousQuarter
+	com.PerformancePreviousQuarter = r.PerformancePreviousQuarter
+	com.CargoPreviousQuarter = r.CargoPreviousQuarter
+
+	s.Companies[r.ID] = com
+
+	return err
+
+}
+
+// OnCompanyStats updates the given company's vehicle counts.
+func (s *State) onCompanyStats(se *Session, r *CompanyStats) (err error) {
+	if s == nil {
+		return ErrNilState
+	}
+
+	s.Lock()
+	defer s.Unlock()
+
+	var com Company
+	if res, ok := s.Companies[r.ID]; ok {
+		// company in state
+		com = res
+	} else {
+		// company not in state
+		com = Company{Vehicles: util.OpenttdTypeCounts{}, Stations: util.OpenttdTypeCounts{}}
+	}
+
+	com.Vehicles.Train = r.Trains
+	com.Vehicles.Truck = r.Lorries
+	com.Vehicles.Bus = r.Buses
+	com.Vehicles.Aircraft = r.Planes
+	com.Vehicles.Ship = r.Ships
+
+	com.Stations.Train = r.TrainStations
+	com.Stations.Truck = r.LorryStations
+	com.Stations.Bus = r.BusStops
+	com.Stations.Aircraft = r.Airports
+	com.Stations.Ship = r.Harbours
+
+	s.Companies[r.ID] = com
+
+	return err
+
+}
 
 // OnInterface handles all events related to states.
 func (s *State) OnInterface(se *Session, i interface{}) (err error) {
@@ -375,6 +442,10 @@ func (s *State) OnInterface(se *Session, i interface{}) (err error) {
 		err = s.onCompanyUpdate(se, r)
 	case *CompanyRemove:
 		err = s.onCompanyRemove(se, r)
+	case *CompanyEconomy:
+		err = s.onCompanyEconomy(se, r)
+	case *CompanyStats:
+		err = s.onCompanyStats(se, r)
 	}
 	return err
 }
