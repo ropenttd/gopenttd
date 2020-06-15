@@ -145,7 +145,7 @@ func (s *State) onClientJoin(se *Session, r *ClientJoin) (err error) {
 
 	if _, ok := s.Clients[r.ID]; ok {
 		// client in clients state, wtf?
-		se.log(LogWarning, "Joining Client %s appears to be in the state already - this shouldn't happen?", r.ID)
+		se.log(LogWarning, "Joining Client %d appears to be in the state already - this shouldn't happen?", r.ID)
 	}
 
 	// If they already exist, we give them a new state anyway
@@ -223,7 +223,7 @@ func (s *State) onClientQuit(se *Session, r *ClientQuit) (err error) {
 	if _, ok := s.Clients[r.ID]; ok {
 		delete(s.Clients, r.ID)
 	} else {
-		se.log(LogWarning, "Leaving Client %s does not appear to be in the state, ignoring", r.ID)
+		se.log(LogWarning, "Leaving Client %d does not appear to be in the state, ignoring", r.ID)
 	}
 
 	return err
@@ -240,7 +240,7 @@ func (s *State) onCompanyNew(se *Session, r *CompanyNew) (err error) {
 
 	if _, ok := s.Companies[r.ID]; ok {
 		// company in state, we obviously missed the removal
-		se.log(LogInformational, "New Company %s appears to be in the state already - we obviously missed the memo", r.ID)
+		se.log(LogInformational, "New Company %d appears to be in the state already - we obviously missed the memo", r.ID)
 	}
 
 	// If they already exist, this gives them a new state anyway (which will be populated by the poll)
@@ -328,7 +328,7 @@ func (s *State) onCompanyRemove(se *Session, r *CompanyRemove) (err error) {
 	if _, ok := s.Companies[r.ID]; ok {
 		delete(s.Companies, r.ID)
 	} else {
-		se.log(LogWarning, "Dissolved Company %s does not appear to be in the state, ignoring", r.ID)
+		se.log(LogWarning, "Dissolved Company %d does not appear to be in the state, ignoring", r.ID)
 	}
 
 	return err

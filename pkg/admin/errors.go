@@ -12,3 +12,7 @@ var ErrNilState = errors.New("state not instantiated, please use admin.New() or 
 // ErrStateNotFound is returned when the state cache
 // requested is not found
 var ErrStateNotFound = errors.New("state cache not found")
+
+var ErrServerFull = errors.New("server is full")
+var ErrServerBanned = errors.New("banned from server")
+var ErrServerError = errors.New("server encountered an error")

@@ -70,7 +70,17 @@ func (s *Session) Open() error {
 	}
 	if e.Type == fullEventType || e.Type == bannedEventType || e.Type == errorEventType {
 		// The server doesn't want us for some reason
-		s.log(LogError, "Server refused our connection: %s", e)
+		switch e.Type {
+		case fullEventType:
+			s.log(LogError, "Server refused our connection: Server full")
+			err = ErrServerFull
+		case bannedEventType:
+			s.log(LogError, "Server refused our connection: Banned from server")
+			err = ErrServerBanned
+		case errorEventType:
+			s.log(LogError, "Server refused our connection: Server error")
+			err = ErrServerFull
+		}
 		return err
 	}
 	if e.Type != protocolEventType {
@@ -401,7 +411,7 @@ func (s *Session) onEvent(messageType uint8, message []byte) (*Event, error) {
 
 		// Attempt to unmarshal our event.
 		if err = ottdUnmarshal(e.RawData, e.Struct); err != nil {
-			s.log(LogError, "error unmarshalling %s event, %s", e.Type, err)
+			s.log(LogError, "error unmarshalling %d event, %s", e.Type, err)
 		}
 
 		// Send event to any registered event handlers for its type.
