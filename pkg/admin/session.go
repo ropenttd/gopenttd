@@ -6,7 +6,7 @@ import (
 )
 
 // VERSION of Gopenttd, follows Semantic Versioning. (http://semver.org/)
-const VERSION = "0.0.1"
+const VERSION = "0.1.0"
 
 // New creates a new OpenTTD Admin session and will automate some startup
 // tasks if given enough information to do so.  Currently you can pass zero
