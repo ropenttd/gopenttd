@@ -91,6 +91,12 @@ func (s *Session) Open() error {
 	s.log(LogInformational, "We are now connected to OpenTTD, emitting connect event")
 	s.handleEvent(connectEventType, &Connect{})
 
+	// Now we have protocol information, send any Update Frequencies that are cached in the session
+	// i.e if we got disconnected
+	for k, v := range s.UpdateFrequencies {
+		go s.RequestUpdates(k, v)
+	}
+
 	// Create listening chan outside of listen, as it needs to happen inside the
 	// mutex lock and needs to exist before calling heartbeat and listen
 	// go routines.
@@ -159,8 +165,6 @@ func (s *Session) isValidUpdateFrequency(t enum.UpdateType, f enum.UpdateFrequen
 // RequestUpdates sends a request to receive updates of the given type from the server at a given interval.
 // Supplying a frequency of POLL is invalid and will return an error - use Session.Poll()
 func (s *Session) RequestUpdates(t enum.UpdateType, f enum.UpdateFrequency) (err error) {
-	// TODO cache these on the Session struct in case we need to reconnect to the server
-
 	if f == enum.UpdateFrequencyPoll || !s.isValidUpdateFrequency(t, f) {
 		// The server will ignore us or refuse us
 		return ErrInvalidUpdateFrequency
@@ -174,7 +178,20 @@ func (s *Session) RequestUpdates(t enum.UpdateType, f enum.UpdateFrequency) (err
 	defer s.connMutex.Unlock()
 
 	err = writePacketToTcpConn(s.conn, data)
-	return err
+
+	if err != nil {
+		return err
+	}
+
+	// Cache the requested update frequency if we successfully sent the update
+	if s.UpdateFrequencies == nil {
+		s.UpdateFrequencies = map[enum.UpdateType]enum.UpdateFrequency{}
+	}
+
+	s.UpdateFrequencies[t] = f
+
+	return
+
 }
 
 // Poll sends a request to receive one update for the given UpdateType and ID.

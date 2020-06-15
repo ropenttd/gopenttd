@@ -49,6 +49,10 @@ type Session struct {
 	// StateEnabled is true.
 	State *State
 
+	// Cache of requested update frequencies - these will be
+	// automatically sent to the server if reconnection is required.
+	UpdateFrequencies map[enum.UpdateType]enum.UpdateFrequency
+
 	// The user agent
 	UserAgent string
 

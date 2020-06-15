@@ -1,6 +1,7 @@
 package admin
 
 import (
+	"github.com/ropenttd/gopenttd/pkg/admin/enum"
 	"time"
 )
 
@@ -17,6 +18,7 @@ func New(hostname string, port int, password string) (s *Session, err error) {
 		State:                  NewState(),
 		StateEnabled:           true,
 		ShouldReconnectOnError: true,
+		UpdateFrequencies:      map[enum.UpdateType]enum.UpdateFrequency{},
 		UserAgent:              "gopenttd (https://github.com/ropenttd/gopenttd)",
 		LastPong:               time.Now().UTC(),
 		Hostname:               hostname,
