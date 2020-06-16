@@ -176,7 +176,7 @@ type Chat struct { // Type 119
 // Rcon fires when a line of RCON output from the server is returned.
 // Use in conjunction with RconEnd to determine when a command has finished.
 type Rcon struct { // Type 120
-	Colour uint8  // Colour as it would be used on the server or a client.
+	Colour uint16 // Colour as it would be used on the server or a client.
 	Output string // Output of the executed command.
 }
 
