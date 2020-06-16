@@ -73,6 +73,12 @@ type Session struct {
 	// Acceptable polling rates
 	pollrates map[enum.UpdateType]uint16
 
+	// Pending RCON commands
+	rconQueue []rconRequest
+
+	// Channel for RCON responses to be sent to
+	rconChan chan *rconResp
+
 	// When nil, the session is not listening.
 	listening chan interface{}
 

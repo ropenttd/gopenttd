@@ -210,6 +210,11 @@ func (s *Session) onInterface(i interface{}) {
 		s.onWelcome(t)
 	case *Shutdown:
 		s.onShutdown(t)
+	// RCON events have to be handled synchronously
+	case *Rcon:
+		s.onRcon(t)
+	case *RconEnd:
+		s.onRconEnd(t)
 	}
 	err := s.State.OnInterface(s, i)
 	if err != nil {
@@ -238,4 +243,14 @@ func (s *Session) onShutdown(_ *Shutdown) {
 	s.log(LogInformational, "Server is shutting down, disconnecting")
 	s.Close()
 	s.reconnect()
+}
+
+// onRcon handles incoming Rcon packets and forwards them to the channel to be picked up by the Rcon goroutine.
+func (s *Session) onRcon(r *Rcon) {
+	s.rconChan <- &rconResp{rcon: r}
+}
+
+// onRconEnd handles incoming Rcon End packets and forwards them to the channel to be picked up by the Rcon goroutine.
+func (s *Session) onRconEnd(r *RconEnd) {
+	s.rconChan <- &rconResp{rconEnd: r}
 }

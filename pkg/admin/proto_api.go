@@ -105,6 +105,7 @@ func (s *Session) Open() error {
 	// Start sending heartbeats and reading messages from the game.
 	go s.heartbeat(s.conn, s.listening)
 	go s.listen(s.conn, s.listening)
+	go s.handleRconRequests(s.listening)
 
 	s.log(LogInformational, "exiting")
 	return nil
