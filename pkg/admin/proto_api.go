@@ -228,19 +228,6 @@ func (s *Session) Chat(act enum.Action, dest enum.Destination, destID uint32, me
 	return err
 }
 
-// Rcon sends a non-blocking RCON command to the server.
-// You are expected to watch for events of type Rcon and RconEnd to determine the result if you use this.
-func (s *Session) Rcon(com string) (err error) {
-	data := packets.AdminRcon{
-		Command: com,
-	}
-	s.connMutex.Lock()
-	defer s.connMutex.Unlock()
-
-	err = writePacketToTcpConn(s.conn, data)
-	return err
-}
-
 // GamescriptCommand sends a non-blocking Gamescript command to the server.
 // You are expected to watch for events of type Gamescript to determine the result if you use this.
 func (s *Session) GamescriptCommand(json string) (err error) {
