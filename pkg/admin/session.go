@@ -24,6 +24,8 @@ func New(hostname string, port int, password string) (s *Session, err error) {
 		Hostname:               hostname,
 		Port:                   port,
 		Password:               password,
+		rconQueue:              []rconRequest{},
+		rconChan:               make(chan *rconResp),
 	}
 
 	// You should now call Open() so that events will trigger.

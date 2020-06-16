@@ -30,7 +30,7 @@ func (s *Session) handleRconRequests(listening <-chan interface{}) {
 		var cmd rconRequest
 		if len(s.rconQueue) == 0 {
 			// no requests available right now
-			break
+			continue
 		}
 
 		// is this too wide of a scope to lock? we could have an RconLock otherwise
@@ -43,7 +43,7 @@ func (s *Session) handleRconRequests(listening <-chan interface{}) {
 		err := s.Rcon(cmd.Command)
 		if err != nil {
 			cmd.responseChan <- []Rcon{}
-			break
+			continue
 		}
 		var data []Rcon
 		var run = true
