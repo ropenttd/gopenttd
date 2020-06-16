@@ -31,12 +31,11 @@ func (s *Session) Rcon(command string) (err error) {
 // Please note: This will block your thread until we get a complete response from the server!
 // If you don't care about the result, use Rcon(command).
 func (s *Session) RconSync(command string) (ret []Rcon, err error) {
-	// is this too wide of a scope to lock? we could have an RconLock otherwise
-	s.Lock()
+	s.rconMtx.Lock()
 	rchan := make(chan []Rcon)
 	obj := rconRequest{Command: command, responseChan: rchan}
 	s.rconQueue = append(s.rconQueue, obj)
-	s.Unlock()
+	s.rconMtx.Unlock()
 	// Block on a response
 	ret = <-obj.responseChan
 	return ret, nil
@@ -64,14 +63,13 @@ func (s *Session) handleRconRequests(listening <-chan interface{}) {
 			continue
 		}
 
-		// is this too wide of a scope to lock? we could have an RconLock otherwise
-		s.Lock()
+		s.rconMtx.Lock()
 
 		// Pop the last thing on the stack
 		cmd, s.rconQueue = s.rconQueue[len(s.rconQueue)-1], s.rconQueue[:len(s.rconQueue)-1]
 
 		// Send it
-		err := s.Rcon(cmd.Command)
+		err := s.sendRconCommand(cmd.Command)
 		if err != nil {
 			if cmd.responseChan != nil {
 				cmd.responseChan <- []Rcon{}
@@ -102,6 +100,6 @@ func (s *Session) handleRconRequests(listening <-chan interface{}) {
 				cmd.responseChan <- data
 			}
 		}
-		s.Unlock()
+		s.rconMtx.Unlock()
 	}
 }

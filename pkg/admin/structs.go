@@ -73,6 +73,9 @@ type Session struct {
 	// Acceptable polling rates
 	pollrates map[enum.UpdateType]uint16
 
+	// Mutex for rconQueue
+	rconMtx sync.Mutex
+
 	// Pending RCON commands
 	rconQueue []rconRequest
 
