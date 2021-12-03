@@ -17,7 +17,7 @@ const (
 	UpdateTypeGamescript
 )
 
-type UpdateFrequency uint8
+type UpdateFrequency uint16
 
 const (
 	UpdateFrequencyPoll    UpdateFrequency = 0x01 << iota
@@ -56,15 +56,15 @@ const (
 type Destination uint8
 
 const (
-	DestinationBroadcast Destination = 0x00 // All destinations
-	DestinationTeam                         // A specific team
-	DestinationClient                       // A specific client
+	DestinationBroadcast Destination = 0x00 << iota // All destinations
+	DestinationTeam                                 // A specific team
+	DestinationClient                               // A specific client
 )
 
 type NetError uint8
 
 const (
-	NetErrorGeneral NetError = 0x00 // A general network failure
+	NetErrorGeneral NetError = 0x00 << iota // A general network failure
 
 	// Signals from clients
 	NetErrorDesync
@@ -84,4 +84,15 @@ const (
 	NetErrorCheater
 	NetErrorFull
 	NetErrorTooManyCommands // 0x0F
+)
+
+type ClientID uint32
+
+const (
+	// Client is not part of anything
+	ClientIDInvalid = 0x00 << iota
+	// Server is guaranteed to have this Client ID
+	ClientIDServer = 0x01
+	// The first Client ID
+	ClientIDFirst = 0x02
 )

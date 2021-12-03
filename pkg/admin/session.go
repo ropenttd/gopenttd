@@ -24,7 +24,7 @@ func New(hostname string, port int, password string) (s *Session, err error) {
 		Hostname:               hostname,
 		Port:                   port,
 		Password:               password,
-		rconQueue:              []rconRequest{},
+		rconQueue:              make(chan *rconRequest),
 		rconChan:               make(chan *rconResp),
 	}
 

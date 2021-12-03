@@ -88,6 +88,20 @@ func (s *Session) Open() error {
 		s.log(LogWarning, "Expected PROTOCOL, instead got:\n%#v\n", e)
 	}
 
+	// Repeat the above to get the Welcome packet
+	mt, m, err = readPacketFromTcpConn(s.conn)
+	if err != nil {
+		return err
+	}
+	e, err = s.onEvent(mt, m)
+	if err != nil {
+		return err
+	}
+	if e.Type != welcomeEventType {
+		// This is not fatal, but it does not follow the standard.
+		s.log(LogWarning, "Expected WELCOME, instead got:\n%#v\n", e)
+	}
+
 	s.log(LogInformational, "We are now connected to OpenTTD, emitting connect event")
 	s.handleEvent(connectEventType, &Connect{})
 
@@ -123,6 +137,9 @@ func (s *Session) Close() (err error) {
 
 	// Nil out the connection
 	s.conn = nil
+
+	// Close the listener
+	close(s.listening)
 
 	s.log(LogInformational, "emit disconnect event")
 	s.handleEvent(disconnectEventType, &Disconnect{})
@@ -241,7 +258,7 @@ func (s *Session) GamescriptCommand(json string) (err error) {
 	return err
 }
 
-// listen polls the websocket connection for events, it will stop when the
+// listen polls the admin connection for events, it will stop when the
 // listening channel is closed, or an error occurs.
 func (s *Session) listen(conn *net.TCPConn, listening <-chan interface{}) {
 
@@ -305,6 +322,7 @@ func (s *Session) reconnect() {
 			err = s.Open()
 			if err == nil {
 				s.log(LogInformational, "successfully reconnected to game")
+				return
 			}
 
 			// Certain race conditions can call reconnect() twice. If this happens, we
@@ -326,7 +344,7 @@ func (s *Session) reconnect() {
 }
 
 // FailedPongs is the Number of pong intervals to wait until forcing a connection restart.
-const FailedPongs = 5 * time.Millisecond
+const FailedPongs = 6
 
 // HeartbeatLatency returns the latency between heartbeat acknowledgement and heartbeat send.
 func (s *Session) HeartbeatLatency() time.Duration {
@@ -344,10 +362,10 @@ func (s *Session) heartbeat(conn *net.TCPConn, listening <-chan interface{}) {
 		return
 	}
 
-	heartbeatIntervalMsec := time.Duration(10000)
+	heartbeatInterval := time.Duration(10 * time.Second)
 
 	var err error
-	ticker := time.NewTicker(heartbeatIntervalMsec * time.Second)
+	ticker := time.NewTicker(heartbeatInterval)
 	defer ticker.Stop()
 
 	for {
@@ -360,7 +378,7 @@ func (s *Session) heartbeat(conn *net.TCPConn, listening <-chan interface{}) {
 		// very lazy implementation of token for very lazy people
 		err = writePacketToTcpConn(conn, packets.AdminPing{Token: 1})
 		s.connMutex.Unlock()
-		if err != nil || time.Now().UTC().Sub(last) > (heartbeatIntervalMsec*FailedPongs) {
+		if err != nil || time.Now().UTC().Sub(last) > (heartbeatInterval*FailedPongs) {
 			if err != nil {
 				s.log(LogError, "error sending heartbeat to server %s, %s", s.Hostname, err)
 			} else {

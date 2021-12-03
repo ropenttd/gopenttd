@@ -19,11 +19,8 @@ type rconResp struct {
 func (s *Session) Rcon(command string) (err error) {
 	// we have to add this to the queue because the handleRconRequests queue will get out of step with commands otherwise
 
-	// is this too wide of a scope to lock? we could have an RconLock otherwise
-	s.Lock()
 	obj := rconRequest{Command: command}
-	s.rconQueue = append(s.rconQueue, obj)
-	s.Unlock()
+	s.rconQueue <- &obj
 	return nil
 }
 
@@ -31,11 +28,9 @@ func (s *Session) Rcon(command string) (err error) {
 // Please note: This will block your thread until we get a complete response from the server!
 // If you don't care about the result, use Rcon(command).
 func (s *Session) RconSync(command string) (ret []Rcon, err error) {
-	s.rconMtx.Lock()
 	rchan := make(chan []Rcon)
 	obj := rconRequest{Command: command, responseChan: rchan}
-	s.rconQueue = append(s.rconQueue, obj)
-	s.rconMtx.Unlock()
+	s.rconQueue <- &obj
 	// Block on a response
 	ret = <-obj.responseChan
 	return ret, nil
@@ -57,49 +52,36 @@ func (s *Session) handleRconRequests(listening <-chan interface{}) {
 	s.log(LogDebug, "called")
 
 	for {
-		var cmd rconRequest
-		if len(s.rconQueue) == 0 {
-			// no requests available right now
-			continue
-		}
-
-		s.rconMtx.Lock()
-
-		// Pop the last thing on the stack
-		cmd, s.rconQueue = s.rconQueue[len(s.rconQueue)-1], s.rconQueue[:len(s.rconQueue)-1]
-
-		// Send it
-		err := s.sendRconCommand(cmd.Command)
-		if err != nil {
-			if cmd.responseChan != nil {
-				cmd.responseChan <- []Rcon{}
-			}
-			continue
-		}
-		var data []Rcon
-		var run = true
-		for run {
-			v := <-s.rconChan
-			switch {
-			case v.rcon != nil:
-				// not an ending packet
-				data = append(data, *v.rcon)
-			case v.rconEnd != nil:
-				// ending packet
-				if v.rconEnd.Command == cmd.Command {
-					run = false
-				}
-			}
-		}
 		select {
 		case <-listening:
-			s.Unlock()
 			return
-		default:
+		case cmd := <-s.rconQueue:
+			// Send it
+			err := s.sendRconCommand(cmd.Command)
+			if err != nil {
+				if cmd.responseChan != nil {
+					cmd.responseChan <- []Rcon{}
+				}
+				continue
+			}
+			var data []Rcon
+			var run = true
+			for run {
+				v := <-s.rconChan
+				switch {
+				case v.rcon != nil:
+					// not an ending packet
+					data = append(data, *v.rcon)
+				case v.rconEnd != nil:
+					// ending packet
+					if v.rconEnd.Command == cmd.Command {
+						run = false
+					}
+				}
+			}
 			if cmd.responseChan != nil {
 				cmd.responseChan <- data
 			}
 		}
-		s.rconMtx.Unlock()
 	}
 }

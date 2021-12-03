@@ -44,12 +44,12 @@ func (p AdminQuit) PacketType() openttd_packets_admin.AdminPacketIndex {
 }
 
 type AdminUpdateFrequency struct { // Type 2
-	Type      enum.UpdateType      // Update type (see #AdminUpdateType).
+	Type      enum.UpdateType      // Update type (see #AdminUpdateType). -- THIS HAS TO BE SENT AS A UINT16 FOR WHO KNOWS WHAT REASON, USE CAUTION
 	Frequency enum.UpdateFrequency // Update frequency (see #AdminUpdateFrequency), setting #ADMIN_FREQUENCY_POLL is always ignored.
 }
 
 func (p AdminUpdateFrequency) Pack() (out bytes.Buffer) {
-	binary.Write(&out, binary.LittleEndian, p.Type)
+	binary.Write(&out, binary.LittleEndian, uint16(p.Type))
 	binary.Write(&out, binary.LittleEndian, p.Frequency)
 	return out
 }
