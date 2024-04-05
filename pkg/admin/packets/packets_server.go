@@ -272,10 +272,10 @@ type ServerCompanyUpdate struct { // Type 115
 	Colour             uint8  // Main company colour.
 	Password           bool   // Company is password protected.
 	BankruptcyQuarters uint8  // Quarters of Bankruptcy.
-	Share1             uint8  // Owner of Share 1.
-	Share2             uint8  // Owner of Share 2.
-	Share3             uint8  // Owner of Share 3.
-	Share4             uint8  // Owner of Share 4.
+	// Share1             uint8  // Owner of Share 1.
+	// Share2             uint8  // Owner of Share 2.
+	// Share3             uint8  // Owner of Share 3.
+	// Share4             uint8  // Owner of Share 4.
 }
 
 func (p ServerCompanyUpdate) String() string {
