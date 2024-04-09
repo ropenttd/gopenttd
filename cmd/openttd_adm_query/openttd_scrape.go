@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	gopenttd "github.com/ropenttd/gopenttd/pkg/admin"
+	"github.com/ropenttd/gopenttd/pkg/admin/enum"
 	log "github.com/sirupsen/logrus"
 	"time"
 )
@@ -39,8 +40,11 @@ func main() {
 	}
 	defer s.Close()
 
+	s.RequestUpdates(enum.UpdateTypeCompanyInfo, enum.UpdateFrequencyAutomatically)
+	s.RequestUpdates(enum.UpdateTypeCompanyEconomy, enum.UpdateFrequencyAutomatically)
+
 	// stupid delay to make sure things settle into state (? find a better way to do this)
-	time.Sleep(3 * time.Second)
+	time.Sleep(10 * time.Second)
 
 	state := s.State
 	var b []byte
