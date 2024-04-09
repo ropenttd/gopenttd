@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/ropenttd/gopenttd/pkg/admin/enum"
+	"io"
 	"reflect"
 )
 
@@ -27,33 +28,61 @@ func genericUnmarshal(p AdminResponsePacket, buffer *bytes.Buffer) (err error) {
 		// binary.Read() doesn't appear to work here (always returns 0?) so do things the long way
 		// i.e binary.Read(buffer, binary.LittleEndian, nv)
 		case reflect.Bool:
-			var nv bool
-			nv = uint8(buffer.Next(1)[0]) != 0
-			f.Set(reflect.ValueOf(nv))
+			if buffer.Len() >= 1 {
+				var nv bool
+				nv = uint8(buffer.Next(1)[0]) != 0
+				f.Set(reflect.ValueOf(nv))
+			} else {
+				return io.ErrUnexpectedEOF
+			}
 		case reflect.Uint8:
-			var nv uint8
-			nv = uint8(buffer.Next(1)[0])
-			f.Set(reflect.ValueOf(nv))
+			if buffer.Len() >= 1 {
+				var nv uint8
+				nv = uint8(buffer.Next(1)[0])
+				f.Set(reflect.ValueOf(nv))
+			} else {
+				return io.ErrUnexpectedEOF
+			}
 		case reflect.Uint16:
-			var nv uint16
-			nv = binary.LittleEndian.Uint16(buffer.Next(2))
-			f.Set(reflect.ValueOf(nv))
+			if buffer.Len() >= 2 {
+				var nv uint16
+				nv = binary.LittleEndian.Uint16(buffer.Next(2))
+				f.Set(reflect.ValueOf(nv))
+			} else {
+				return io.ErrUnexpectedEOF
+			}
 		case reflect.Uint32:
-			var nv uint32
-			nv = binary.LittleEndian.Uint32(buffer.Next(4))
-			f.Set(reflect.ValueOf(nv))
+			if buffer.Len() >= 4 {
+				var nv uint32
+				nv = binary.LittleEndian.Uint32(buffer.Next(4))
+				f.Set(reflect.ValueOf(nv))
+			} else {
+				return io.ErrUnexpectedEOF
+			}
 		case reflect.Int64:
-			var nv int64
-			binary.Read(buffer, binary.LittleEndian, &nv)
-			f.Set(reflect.ValueOf(nv))
+			if buffer.Len() >= 8 {
+				var nv int64
+				binary.Read(buffer, binary.LittleEndian, &nv)
+				f.Set(reflect.ValueOf(nv))
+			} else {
+				return io.ErrUnexpectedEOF
+			}
 		case reflect.Uint64:
-			var nv uint64
-			nv = binary.LittleEndian.Uint64(buffer.Next(8))
-			f.Set(reflect.ValueOf(nv))
+			if buffer.Len() >= 8 {
+				var nv uint64
+				nv = binary.LittleEndian.Uint64(buffer.Next(8))
+				f.Set(reflect.ValueOf(nv))
+			} else {
+				return io.ErrUnexpectedEOF
+			}
 		case reflect.String:
-			nvBytes, _ := buffer.ReadBytes(byte(0))
-			nv := string(bytes.Trim(nvBytes, "\x00"))
-			f.Set(reflect.ValueOf(nv))
+			if buffer.Len() >= 1 {
+				nvBytes, _ := buffer.ReadBytes(byte(0))
+				nv := string(bytes.Trim(nvBytes, "\x00"))
+				f.Set(reflect.ValueOf(nv))
+			} else {
+				return io.ErrUnexpectedEOF
+			}
 		}
 	}
 	return err
@@ -272,10 +301,10 @@ type ServerCompanyUpdate struct { // Type 115
 	Colour             uint8  // Main company colour.
 	Password           bool   // Company is password protected.
 	BankruptcyQuarters uint8  // Quarters of Bankruptcy.
-	// Share1             uint8  // Owner of Share 1.
-	// Share2             uint8  // Owner of Share 2.
-	// Share3             uint8  // Owner of Share 3.
-	// Share4             uint8  // Owner of Share 4.
+	Share1             uint8  // Owner of Share 1.
+	Share2             uint8  // Owner of Share 2.
+	Share3             uint8  // Owner of Share 3.
+	Share4             uint8  // Owner of Share 4.
 }
 
 func (p ServerCompanyUpdate) String() string {

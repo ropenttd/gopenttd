@@ -307,11 +307,13 @@ func (s *State) onCompanyUpdate(se *Session, r *CompanyUpdate) (err error) {
 	com.Passworded = r.Password
 	com.Bankruptcy = r.BankruptcyQuarters
 
-	// Shares removed in OpenTTD 14.0
-	// com.Share1 = r.Share1
-	// com.Share2 = r.Share2
-	// com.Share3 = r.Share3
-	// com.Share4 = r.Share4
+	if se.State.ProtocolVersion <= 2 {
+		// Company shares were removed in OpenTTD 14.0.
+		com.Share1 = r.Share1
+		com.Share2 = r.Share2
+		com.Share3 = r.Share3
+		com.Share4 = r.Share4
+	}
 
 	s.Companies[r.ID] = com
 
